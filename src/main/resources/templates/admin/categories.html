@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>카테고리 관리</title>
+  <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container mt-5">
+  <h2 class="mb-4">카테고리 관리</h2>
+
+  <div th:if="${flashMessage}" class="alert alert-success" th:text="${flashMessage}"></div>
+  <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+  <!-- 추가 폼 -->
+  <form th:action="@{/admin/categories}" method="post" class="card p-3 mb-4">
+    <div class="form-group mb-2">
+      <label for="name">카테고리 이름</label>
+      <input id="name" name="name" class="form-control" placeholder="예) 게임" required/>
+    </div>
+    <div class="form-group mb-3">
+      <label for="parentId">상위 카테고리 (선택)</label>
+      <select id="parentId" name="parentId" class="form-control">
+        <option value="">(최상위)</option>
+        <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+      </select>
+    </div>
+    <div>
+      <button type="submit" class="btn btn-primary">추가</button>
+      <a th:href="@{/admin/dashboard}" class="btn btn-secondary">대시보드</a>
+    </div>
+  </form>
+
+  <!-- 목록 -->
+  <table class="table table-bordered">
+    <thead class="thead-light">
+    <tr>
+      <th style="width: 80px;">ID</th>
+      <th>이름</th>
+      <th style="width: 220px;">상위 카테고리</th>
+      <th style="width: 140px;">작업</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="c : ${categories}">
+      <td th:text="${c.id}">1</td>
+      <td th:text="${c.name}">게임</td>
+      <td th:text="${c.parentName != null ? c.parentName : '(최상위)'}">(최상위)</td>
+      <td>
+        <form th:action="@{/admin/categories/{id}/delete(id=${c.id})}" method="post"
+              onsubmit="return confirm('정말 삭제할까요?');">
+          <button type="submit" class="btn btn-sm btn-danger">삭제</button>
+        </form>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<script th:src="@{/webjars/bootstrap/4.5.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

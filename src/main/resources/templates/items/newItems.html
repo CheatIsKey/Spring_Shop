@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>상품 등록</title>
+
+  <!-- Bootstrap CSS -->
+  <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet"/>
+  <link th:href="@{/css/style.css}" rel="stylesheet"/>
+  <style>
+    #price::-webkit-outer-spin-button,
+    #price::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    #price { -moz-appearance: textfield; }
+  </style>
+</head>
+<body>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">상품 등록</h4>
+        </div>
+        <div class="card-body">
+          <form th:action="@{/items/new}"
+                th:object="${itemForm}"
+                method="post"
+                enctype="multipart/form-data">
+
+            <!-- 상품명 -->
+            <div class="form-group">
+              <label for="name">상품명</label>
+              <input type="text"
+                     th:field="*{name}"
+                     class="form-control"
+                     id="name"
+                     placeholder="상품명을 입력하세요"
+                     required/>
+            </div>
+
+            <!-- 카테고리 -->
+            <div class="form-group">
+              <label for="category">카테고리</label>
+              <select th:field="*{categoryId}"
+                      class="form-control"
+                      id="category"
+                      required>
+                <option value="" disabled th:selected="*{categoryId} == null">
+                  카테고리 선택
+                </option>
+                <option th:each="cat : ${categories}"
+                        th:value="${cat.id}"
+                        th:text="${cat.name}">
+                </option>
+              </select>
+            </div>
+
+            <!-- 가격 -->
+            <div class="form-group">
+              <label for="price">가격</label>
+              <input type="number"
+                     th:field="*{price}"
+                     class="form-control"
+                     id="price"
+                     min="0"
+                     placeholder="0"
+                     required/>
+            </div>
+
+            <!-- 재고 -->
+            <div class="form-group">
+              <label for="stockQuantity">재고</label>
+              <input type="number"
+                     th:field="*{stockQuantity}"
+                     class="form-control"
+                     id="stockQuantity"
+                     min="1"
+                     placeholder="1"
+                     required/>
+            </div>
+
+            <!-- 이미지 -->
+            <div class="form-group">
+              <label for="image">상품 이미지</label>
+              <input type="file"
+                     th:field="*{image}"
+                     class="form-control-file"
+                     id="image"
+                     accept="image/*"
+                     required/>
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary btn-block">
+              상품 등록
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS -->
+<script th:src="@{/webjars/jquery/3.5.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.5.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spring Shopping Mall</title>
+  <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet"/>
+  <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <a class="navbar-brand font-weight-bold" th:href="@{/}">Shopping Mall</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navBarContent">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navBarContent">
+    <ul class="navbar-nav mr-auto align-items-center">
+      <!-- 카테고리 + 검색 -->
+      <li class="nav-item">
+        <form class="form-inline" th:action="@{/}" method="get">
+          <select class="form-control mr-2" name="category"
+                  th:value="${param.category}"
+                  onchange="this.form.submit()">
+            <option value="" th:selected="${param.category} == null">전체 카테고리</option>
+            <option th:each="cat : ${categories}"
+                    th:value="${cat.id}"
+                    th:text="${cat.name}"
+                    th:selected="${param.category} == ${cat.id}">
+            </option>
+          </select>
+
+          <input class="form-control mr-2" type="search" name="q"
+                 th:value="${param.q}" placeholder="상품 검색"/>
+          <button class="btn btn-light">검색</button>
+        </form>
+      </li>
+    </ul>
+
+    <ul class="navbar-nav align-items-center">
+      <!-- 로그인 전 -->
+      <li class="nav-item" th:if="${session.loginUser == null}">
+        <a class="btn btn-light mr-2" th:href="@{/login}">로그인</a>
+      </li>
+      <li class="nav-item" th:if="${session.loginUser == null}">
+        <a class="btn btn-light" th:href="@{/users/new}">회원가입</a>
+      </li>
+
+      <!-- 관리자 -->
+      <li class="nav-item"
+          th:if="${session.loginUser != null and session.loginUser.userRole.name() == 'ADMIN'}">
+        <a class="nav-link d-flex align-items-center" th:href="@{/admin/dashboard}">
+          관리자 대시보드
+          <span class="badge badge-warning ml-2">ADMIN</span>
+        </a>
+      </li>
+      <li class="nav-item"
+          th:if="${session.loginUser != null and session.loginUser.userRole.name() == 'ADMIN'}">
+        <a class="nav-link" th:href="@{/admin/categories}">카테고리 관리</a>
+      </li>
+
+      <!-- 일반 사용자 -->
+      <li class="nav-item"
+          th:if="${session.loginUser != null and session.loginUser.userRole.name() != 'ADMIN'}">
+        <a class="nav-link text-white" th:href="@{/users/mypage}">마이페이지</a>
+      </li>
+      <li class="nav-item mr-3"
+          th:if="${session.loginUser != null and session.loginUser.userRole.name() != 'ADMIN'}">
+        <a class="nav-link text-white position-relative" th:href="@{/cart}">
+          장바구니
+          <span class="badge badge-light position-absolute cart-badge"
+                th:text="${cartKindCount}">0</span>
+        </a>
+      </li>
+
+      <!-- 로그아웃 -->
+      <li class="nav-item" th:if="${session.loginUser != null}">
+        <form th:action="@{/logout}" method="post" class="form-inline">
+          <button type="submit" class="btn btn-outline-light">로그아웃</button>
+        </form>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- 상품 목록 -->
+<div class="container">
+  <h2 class="mb-4">상품 목록</h2>
+  <div class="row">
+    <div class="col-md-4 mb-4" th:each="itemDto : ${itemDtos}">
+      <div class="card h-100 shadow-sm">
+        <!-- 이미지 -->
+        <img class="card-img-top"
+             th:if="${itemDto.imageUrl != null}"
+             th:src="@{${itemDto.imageUrl}}"
+             alt="상품 이미지"/>
+        <img class="card-img-top"
+             th:if="${itemDto.imageUrl == null}"
+             th:src="@{/images/default.png}"
+             alt="기본 이미지"/>
+
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title" th:text="${itemDto.name}">상품명</h5>
+          <p class="card-text mb-4">
+            가격:
+            <strong th:text="${#numbers.formatDecimal(itemDto.price, 0, 'COMMA', 0, 'POINT')}">0</strong> 원
+          </p>
+          <p class="card-text">
+            재고: <strong th:text="${itemDto.stockQuantity}">0</strong> 개
+          </p>
+
+          <!-- 주문하기 = 장바구니 담고 /cart로 이동 -->
+          <form th:action="@{/cart/add}" method="post" class="mt-auto">
+            <input type="hidden" name="itemId" th:value="${itemDto.id}"/>
+            <input type="hidden" name="redirectURL" value="/cart"/>
+
+            <div class="input-group">
+              <input type="number" name="quantity" class="form-control"
+                     min="1" th:attr="max=${itemDto.stockQuantity}" value="1"/>
+
+              <div class="input-group-append">
+                <!-- 로그인 O: 바로 담기 -->
+                <button class="btn btn-primary"
+                        th:if="${session.loginUser != null}"
+                        type="submit">
+                  주문하기
+                </button>
+                <!-- 로그인 X: 로그인으로 이동 (redirectURL는 서버 인터셉터가 처리) -->
+                <a class="btn btn-primary"
+                   th:if="${session.loginUser == null}"
+                   th:href="@{/login}">
+                  주문하기
+                </a>
+              </div>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer bg-light text-center py-3 mt-4">
+  <div class="container">
+    <span class="text-muted">© 2025 Spring Shopping Mall</span>
+  </div>
+</footer>
+
+<script th:src="@{/webjars/jquery/3.5.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.5.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

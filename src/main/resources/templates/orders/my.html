@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <title>내 주문 목록</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; }
+    .toast { padding: 10px 12px; background: #eef7ff; border: 1px solid #bcdcff; margin-bottom: 12px; border-radius: 8px; }
+    .error { padding: 10px 12px; background: #fff3f3; border: 1px solid #ffc6c6; margin-bottom: 12px; border-radius: 8px; }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .muted { color:#6b7280; font-size: 14px; }
+    table { width:100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; }
+    .actions { display:flex; gap:8px; margin-top: 10px; }
+    .btn { padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd; background: #fafafa; cursor: pointer; text-decoration: none; color: inherit; }
+    .btn-danger { background:#fee2e2; border-color:#fecaca; }
+    .summary { margin-top:8px; }
+    .summary span { margin-right:12px; }
+    /* 상단 헤더 */
+    .header { display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+
+<!-- Flash messages -->
+<div th:if="${toast}" class="toast" th:text="${toast}">완료 메시지</div>
+<div th:if="${error}" class="error" th:text="${error}">오류 메시지</div>
+
+<div class="header">
+  <h1>내 주문 목록</h1>
+  <a th:href="@{/}" class="btn">홈으로</a>
+</div>
+
+<div th:if="${#lists.isEmpty(rows)}">
+  <p class="muted">아직 주문이 없습니다.</p>
+</div>
+
+<!-- rows 기반으로 출력 -->
+<div th:each="r : ${rows}" class="card">
+
+  <div>
+    <strong th:text="'주문번호 #' + ${r.id}">주문번호</strong>
+    <span class="muted"
+          th:text="${#temporals.format(r.orderDate, 'yyyy-MM-dd HH:mm')}">주문일시</span>
+  </div>
+
+  <div class="summary">
+    <span class="muted" th:text="'상태: ' + ${r.status}">상태</span>
+    <span class="muted"
+          th:if="${r.deliveryStatus != null and r.deliveryStatus != '-'}"
+          th:text="'배송상태: ' + ${r.deliveryStatus}">배송상태</span>
+    <span>
+      총합:
+      <strong th:text="${#numbers.formatInteger(r.totalPrice, 3, 'COMMA')}">0</strong> 원
+    </span>
+  </div>
+
+  <div class="actions">
+    <a th:href="@{|/orders/${r.id}|}" class="btn">상세보기</a>
+
+    <!-- 배송 완료가 아니고 주문 상태가 ORDER일 때만 취소 버튼 노출 -->
+    <form th:if="${r.status == 'ORDER' and (r.deliveryStatus == null || r.deliveryStatus != 'COMP')}"
+          th:action="@{|/orders/${r.id}/cancel|}" method="post"
+          onsubmit="return confirm('주문을 취소하시겠습니까?');">
+      <button type="submit" class="btn btn-danger">주문 취소</button>
+      <input type="hidden" th:if="${_csrf != null}"
+             th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

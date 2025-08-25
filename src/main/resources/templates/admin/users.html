@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>유저 조회</title>
+  <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container mt-5">
+  <h2 class="mb-4">유저 조회</h2>
+
+  <!-- 검색/필터 -->
+  <form class="form-inline mb-3" th:action="@{/admin/users}" method="get">
+    <input class="form-control mr-2" type="search" name="word" placeholder="이름/아이디/전화"
+           th:value="${word}">
+    <select class="form-control mr-2" name="role">
+      <option value="" th:selected="${role} == null">전체</option>
+      <option value="CLIENT"  th:selected="${role != null and role.name() == 'CLIENT'}">CLIENT</option>
+      <option value="ADMIN" th:selected="${role != null and role.name() == 'ADMIN'}">ADMIN</option>
+    </select>
+    <button class="btn btn-primary">검색</button>
+    <a class="btn btn-secondary ml-2" th:href="@{/admin/dashboard}">대시보드</a>
+  </form>
+
+  <!-- 목록 -->
+  <table class="table table-bordered">
+    <thead class="thead-light">
+    <tr>
+      <th>ID</th>
+      <th>아이디</th>
+      <th>이름</th>
+      <th>전화</th>
+      <th>권한</th>
+      <th>주소</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="u : ${users.content}">
+      <td th:text="${u.id}">1</td>
+      <td th:text="${u.idUser}">admin</td>
+      <td th:text="${u.name}">관리자</td>
+      <td th:text="${u.phone}">010-0000-0000</td>
+      <td th:text="${u.role}">ADMIN</td>
+      <td>
+        <span th:text="${u.state}">Seoul</span>
+        <span th:text="${u.city}">Seoul</span>
+        <span th:text="${u.street}">Street</span>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- 페이지네이션 -->
+  <nav th:if="${users.totalPages > 1}">
+    <ul class="pagination">
+      <li class="page-item" th:classappend="${users.first}? 'disabled'">
+        <a class="page-link"
+           th:href="@{|/admin/users?page=${users.number - 1}&size=${users.size}&word=${word != null ? word : ''}&role=${role != null ? role.name() : ''}|}">
+          이전
+        </a>
+      </li>
+
+      <li class="page-item"
+          th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}"
+          th:classappend="${i == users.number} ? 'active'">
+        <a class="page-link"
+           th:text="${i + 1}"
+           th:href="@{|/admin/users?page=${i}&size=${users.size}&word=${word != null ? word : ''}&role=${role != null ? role.name() : ''}|}">
+          1
+        </a>
+      </li>
+
+      <li class="page-item" th:classappend="${users.last}? 'disabled'">
+        <a class="page-link"
+           th:href="@{|/admin/users?page=${users.number + 1}&size=${users.size}&word=${word != null ? word : ''}&role=${role != null ? role.name() : ''}|}">
+          다음
+        </a>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<script th:src="@{/webjars/bootstrap/4.5.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

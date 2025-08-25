@@ -1,0 +1,119 @@
+<!-- src/main/resources/templates/users/editUserForm.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>회원정보 수정</title>
+    <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="text-center mb-4">회원정보 수정</h2>
+
+    <form th:action="@{/users/{id}/edit(id=${id})}"
+          th:object="${updateUserRequest}"
+          method="post">
+
+        <!-- 이름 -->
+        <div class="form-group">
+            <label for="name">이름</label>
+            <input th:field="*{name}"
+                   id="name"
+                   class="form-control"
+                   placeholder="이름"
+                   required/>
+            <div class="text-danger"
+                 th:if="${#fields.hasErrors('name')}"
+                 th:errors="*{name}"></div>
+        </div>
+
+        <!-- 아이디 -->
+        <div class="form-group">
+            <label for="idUser">아이디</label>
+            <input th:field="*{idUser}"
+                   id="idUser"
+                   class="form-control"
+                   placeholder="아이디"
+                   required/>
+            <div class="text-danger"
+                 th:if="${#fields.hasErrors('idUser')}"
+                 th:errors="*{idUser}"></div>
+        </div>
+
+        <!-- 새 비밀번호 -->
+        <div class="form-group">
+            <label for="newPassword">새 비밀번호</label>
+            <input th:field="*{newPassword}"
+                   id="newPassword"
+                   type="password"
+                   class="form-control"
+                   placeholder="변경할 비밀번호 (4~20자)"/>
+            <small class="form-text text-muted">
+                비밀번호를 변경하지 않으려면 비워 두세요.
+            </small>
+            <div class="text-danger"
+                 th:if="${#fields.hasErrors('newPassword')}"
+                 th:errors="*{newPassword}"></div>
+        </div>
+
+        <!-- 전화번호 -->
+        <div class="form-group">
+            <label for="phone">전화번호</label>
+            <input th:field="*{phone}"
+                   id="phone"
+                   class="form-control"
+                   placeholder="010-1234-5678"
+                   required/>
+            <div class="text-danger"
+                 th:if="${#fields.hasErrors('phone')}"
+                 th:errors="*{phone}"></div>
+        </div>
+
+        <!-- 주소 -->
+        <fieldset class="form-group">
+            <legend>주소</legend>
+            <div class="form-row">
+                <div class="col">
+                    <input th:field="*{state}"
+                           id="state"
+                           class="form-control mb-2"
+                           placeholder="시/도"
+                           required/>
+                    <div class="text-danger"
+                         th:if="${#fields.hasErrors('state')}"
+                         th:errors="*{state}"></div>
+                </div>
+                <div class="col">
+                    <input th:field="*{city}"
+                           id="city"
+                           class="form-control mb-2"
+                           placeholder="시/군/구"
+                           required/>
+                    <div class="text-danger"
+                         th:if="${#fields.hasErrors('city')}"
+                         th:errors="*{city}"></div>
+                </div>
+                <div class="col">
+                    <input th:field="*{street}"
+                           id="street"
+                           class="form-control"
+                           placeholder="도로명"
+                           required/>
+                    <div class="text-danger"
+                         th:if="${#fields.hasErrors('street')}"
+                         th:errors="*{street}"></div>
+                </div>
+            </div>
+        </fieldset>
+
+        <button type="submit"
+                class="btn btn-primary btn-block mt-3">
+            수정 완료
+        </button>
+    </form>
+</div>
+
+<script th:src="@{/webjars/jquery/3.5.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.5.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>관리자 대시보드</title>
+    <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="mb-4">관리자 대시보드</h2>
+
+    <div th:if="${flashMessage}" class="alert alert-success" th:text="${flashMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+    <div class="list-group">
+        <a th:href="@{/admin/categories}" class="list-group-item list-group-item-action">카테고리 관리</a>
+        <a th:href="@{/admin/users}" class="list-group-item list-group-item-action">유저 조회</a>
+    </div>
+
+    <div class="mt-4">
+        <a th:href="@{/}" class="btn btn-secondary">홈으로</a>
+    </div>
+</div>
+
+<script th:src="@{/webjars/bootstrap/4.5.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

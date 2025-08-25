@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>회원가입</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap -->
+  <link rel="stylesheet"
+        th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" />
+</head>
+<body>
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <h2 class="text-center mb-4">회원가입</h2>
+      <form th:action="@{/users/new}"
+            th:object="${createUserRequest}"
+            method="post">
+
+        <!-- 전역 에러 표시 -->
+        <div th:if="${#fields.hasGlobalErrors()}"
+             class="alert alert-danger">
+          <ul class="mb-0">
+            <!-- err는 이미 메시지 문자열이므로 바로 출력 -->
+            <li th:each="err : ${#fields.globalErrors()}"
+                th:text="${err}">에러 메시지</li>
+          </ul>
+        </div>
+
+        <div class="form-group">
+          <label for="name">이름</label>
+          <input type="text" id="name"
+                 th:field="*{name}"
+                 class="form-control"
+                 placeholder="이름 입력"
+                 required />
+          <div class="text-danger"
+               th:if="${#fields.hasErrors('name')}"
+               th:errors="*{name}"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">전화번호</label>
+          <input type="text" id="phone"
+                 th:field="*{phone}"
+                 class="form-control"
+                 placeholder="010-1234-5678"
+                 required />
+          <div class="text-danger"
+               th:if="${#fields.hasErrors('phone')}"
+               th:errors="*{phone}"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="idUser">아이디</label>
+          <input type="text" id="idUser"
+                 th:field="*{idUser}"
+                 class="form-control"
+                 placeholder="아이디 입력"
+                 required />
+          <div class="text-danger"
+               th:if="${#fields.hasErrors('idUser')}"
+               th:errors="*{idUser}"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">비밀번호</label>
+          <input type="password" id="password"
+                 th:field="*{password}"
+                 class="form-control"
+                 placeholder="비밀번호 입력"
+                 required />
+          <div class="text-danger"
+               th:if="${#fields.hasErrors('password')}"
+               th:errors="*{password}"></div>
+        </div>
+
+        <fieldset class="form-group">
+          <legend>주소</legend>
+          <div class="form-row">
+            <div class="col">
+              <input type="text"
+                     th:field="*{state}"
+                     class="form-control mb-2"
+                     placeholder="시/도"
+                     required />
+              <div class="text-danger"
+                   th:if="${#fields.hasErrors('state')}"
+                   th:errors="*{state}"></div>
+            </div>
+            <div class="col">
+              <input type="text"
+                     th:field="*{city}"
+                     class="form-control mb-2"
+                     placeholder="시/군/구"
+                     required />
+              <div class="text-danger"
+                   th:if="${#fields.hasErrors('city')}"
+                   th:errors="*{city}"></div>
+            </div>
+            <div class="col">
+              <input type="text"
+                     th:field="*{street}"
+                     class="form-control"
+                     placeholder="도로명"
+                     required />
+              <div class="text-danger"
+                   th:if="${#fields.hasErrors('street')}"
+                   th:errors="*{street}"></div>
+            </div>
+          </div>
+        </fieldset>
+
+        <button type="submit"
+                class="btn btn-primary btn-block mt-3">
+          가입하기
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- JS -->
+<script th:src="@{/webjars/jquery/3.5.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.5.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+/* 페이지 배경 */
+body {
+  background-color: #f0f2f5;
+}
+
+/* 배지(장바구니 숫자) 위치 조정 */
+.cart-badge {
+  top: -5px;
+  right: -10px;
+}
+
+/* 상품 카드 호버 이펙트 */
+.card:hover {
+  transform: translateY(-4px);
+  transition: transform 0.2s ease;
+}
+
+/* Jumbotron 배경색 조절 */
+.jumbotron {
+  background-color: #e9ecef;
+  padding: 2.5rem 1rem;
+  border-radius: 0.5rem;
+}
+
+/* 네비게이션 링크/브랜드/버튼을 흰색으로 통일 */
+.navbar-dark .navbar-brand,
+.navbar-dark .navbar-nav .nav-link {
+  color: #fff !important;
+  text-decoration: none;
+}
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-brand:hover {
+  color: rgba(255,255,255,.85) !important;
+}
+
+/* 배지 위치/가독성 */
+.cart-badge { top: -6px; right: -10px; }
+.navbar .badge-light { background-color:#fff; color:#007bff; }
+

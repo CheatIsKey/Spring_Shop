@@ -1,0 +1,12 @@
+# 1. 베이스 이미지 설정
+FROM openjdk:17-jdk-slim
+
+# 2. JAR 파일 복사 (JAR 이름은 실제 프로젝트 이름으로 변경 필요)
+#COPY ./build/libs/capstone_shop-0.0.1-SNAPSHOT.jar
+COPY ./build/libs/app.jar app.jar
+
+# 3. 컨테이너 포트 오픈
+EXPOSE 8080
+
+# 4. 실행 명령
+ENTRYPOINT ["java", "-jar", "/app.jar"]

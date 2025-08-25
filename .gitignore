@@ -1,0 +1,74 @@
+# --- Project docs / helpers ---
+HELP.md
+
+# --- Build systems ---
+.gradle/
+build/
+target/
+out/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# --- Generated (QueryDSL 등) ---
+build/generated/**
+build/tmp/**
+# (만약 src/main/generated를 쓰도록 설정했다면 이 줄도 추가)
+# src/main/generated/**
+
+# --- IDE ---
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+
+# --- Local DB files (H2 등) ---
+*.mv.db
+*.h2.db
+
+# --- Secrets (절대 커밋 금지) ---
+src/main/resources/gcp-key.json
+src/main/resources/*.key
+src/main/resources/*.p12
+src/main/resources/*.pem
+src/main/resources/*.crt
+# 환경별 실 파일은 제외, 예시만 허용
+src/main/resources/application-local.yml
+src/main/resources/application-secret.yml
+!src/main/resources/application-example.yml
+
+# --- Env files ---
+.env
+.env.*
