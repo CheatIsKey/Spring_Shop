@@ -15,13 +15,20 @@ import java.util.List;
 @DiscriminatorColumn(name = "DTYPE")
 public abstract class Item {
 
-    @Id @GeneratedValue
-    @Column(name = "item_id")
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
+    @Column(nullable = false, length = 200)
     private String name;
+
+    @Column(nullable = false)
     private int price;
+
+    @Column(name = "stock", nullable = false)
     private int stockQuantity;
+
+    @Column(name = "image_url")
     private String imageUrl;
 
     @OneToMany(mappedBy = "item")

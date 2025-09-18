@@ -1,4 +1,8 @@
 runtime: java17
-env: standard
-service: default
-instance_class: F2
+env_variables:
+  SPRING_PROFILES_ACTIVE: local
+
+  DB_USER: shop
+  DB_PASSWORD: 'px0SD5<>.{cYc\xh'
+  DB_NAME: shop
+  INSTANCE_CONNECTION_NAME: spring-jpa-shop:us-central1:shop-pg

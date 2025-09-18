@@ -20,8 +20,7 @@ import java.util.Set;
 @Getter
 public class User {
 
-    @Id @GeneratedValue
-    @Column(name = "user_id")
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
@@ -43,7 +42,11 @@ public class User {
     private UserRole role;
 
     @ElementCollection
-    @CollectionTable(name = "FAVORITE_CART")
+    @CollectionTable(
+            name = "FAVORITE_CART",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Column(name = "favorite")
     private Set<String> favorite = new HashSet<>();
 
     public static User createUser(String name, String phone, String idUser, String password,

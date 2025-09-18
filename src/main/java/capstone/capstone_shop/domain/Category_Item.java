@@ -5,11 +5,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 @Entity
+@Table(name = "category_item")
 @Getter
 public class Category_Item {
 
-    @Id @GeneratedValue
-    @Column(name = "category_item_id")
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

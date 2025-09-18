@@ -1,0 +1,19 @@
+-- 부모 item 테이블에 DTYPE 추가(@DiscriminatorColumn 사용 중이면 필요)
+ALTER TABLE item
+  ADD COLUMN IF NOT EXISTS "DTYPE" VARCHAR(31);
+
+-- JOINED 전략: 각 서브타입 테이블은 PK=FK(item.id)만 있으면 됨
+CREATE TABLE IF NOT EXISTS game (
+  id BIGINT PRIMARY KEY,
+  CONSTRAINT fk_game_item FOREIGN KEY (id) REFERENCES item(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS movie (
+  id BIGINT PRIMARY KEY,
+  CONSTRAINT fk_movie_item FOREIGN KEY (id) REFERENCES item(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS music (
+  id BIGINT PRIMARY KEY,
+  CONSTRAINT fk_music_item FOREIGN KEY (id) REFERENCES item(id) ON DELETE CASCADE
+);

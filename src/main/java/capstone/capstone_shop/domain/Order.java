@@ -12,8 +12,7 @@ import java.util.List;
 @Getter
 public class Order {
 
-    @Id @GeneratedValue
-    @Column(name = "order_id")
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

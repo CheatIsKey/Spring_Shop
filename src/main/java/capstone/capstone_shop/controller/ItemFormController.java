@@ -11,6 +11,7 @@ import capstone.capstone_shop.repository.CategoryItemRepository;
 import capstone.capstone_shop.repository.CategoryRepository;
 import capstone.capstone_shop.service.GcsUploader;
 import capstone.capstone_shop.service.ItemService;
+import capstone.capstone_shop.service.storage.ImageStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,7 +26,7 @@ import java.io.IOException;
 public class ItemFormController {
 
     private final ItemService itemService;
-    private final GcsUploader gcsUploader;
+    private final ImageStorage imageStorage;
     private final CategoryRepository categoryRepository;
     private final CategoryItemRepository categoryItemRepository;
 
@@ -40,7 +41,7 @@ public class ItemFormController {
     @PostMapping("/items/new")
     public String createItem(@ModelAttribute ItemForm form) throws IOException {
 
-        String imageUrl = gcsUploader.uploadFile(form.getImage());
+        String imageUrl = imageStorage.upload(form.getImage());
 
         Category category = categoryRepository.findById(form.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));

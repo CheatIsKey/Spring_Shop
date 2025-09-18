@@ -10,8 +10,7 @@ import lombok.Setter;
 @Getter
 public class OrderItem {
 
-    @Id @GeneratedValue
-    @Column(name = "order_item_id")
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

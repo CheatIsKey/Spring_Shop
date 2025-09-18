@@ -1,43 +1,52 @@
+# src/main/resources/application.yml  (로컬 전용)
 spring:
-  datasource:
-    url: jdbc:h2:file:~/capstone-db;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+  application:
+    name: capstone-shop
 
-  servlet:
-    session:
-      timeout: 30m
-      cookie:
-        http-only: true
-        secure: false  # HTTPs
-        same-site: Lax
+---
+spring:
+  config:
+    activate:
+      on-profile: default
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/shop
+    username: shop
+    password: shop
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
   jpa:
     hibernate:
-      ddl-auto: create
-    defer-datasource-initialization: true
+      ddl-auto: validate
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-        # show_sql: true
         format_sql: true
-        hibernate.default_batch_fetch_size: 100
+        default_batch_fetch_size: 100
+        jdbc.time_zone: UTC
+        default_schema: public
+
+  flyway:
+    enabled: true
+    default-schema: public
+    schemas: public
+    create-schemas: true
+
   sql:
     init:
-      mode: always
+      mode: never
 
-  cloud:
-    gcp:
-      project-id: spring-jpa-shop
-      storage:
-        bucket: spring-jpa
+logging:
+  level:
+    org.hibernate.SQL: debug
 
-logging.level:
-  org.hibernate.SQL: debug
-# org.hibernate.type: trace #스프링 부트 2.x, hibernate5
-# org.hibernate.orm.jdbc.bind: trace #스프링 부트 3.x, hibernate6
+gcs:
+  enabled: false
+
+file:
+  upload-dir: ${java.io.tmpdir}/capstone-uploads
