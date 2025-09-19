@@ -1,11 +1,13 @@
-# Dockerfile
+# ---------- Build stage ----------
+FROM gradle:8.10.2-jdk17-alpine AS build
+WORKDIR /workspace
+# 전체 소스 복사 (gradle wrapper 없어도 gradle 명령으로 동작)
+COPY . .
+# 테스트 스킵하고 부트 JAR 빌드
+RUN gradle -g /home/gradle/.gradle bootJar -x test
+
+# ---------- Runtime stage ----------
 FROM eclipse-temurin:17-jdk-alpine
-
-# 빌드된 JAR 파일 경로를 지정
-ARG JAR_FILE=build/libs/capstone_shop-0.0.1-SNAPSHOT.jar
-
-# JAR 파일을 컨테이너에 복사
-COPY ${JAR_FILE} app.jar
-
-# 실행
+# 생성된 JAR 복사 (SNAPSHOT 버전 그대로 사용 중이므로 매치됨)
+COPY --from=build /workspace/build/libs/*SNAPSHOT.jar /app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
