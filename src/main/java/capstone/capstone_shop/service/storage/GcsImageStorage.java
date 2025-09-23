@@ -4,6 +4,7 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -12,18 +13,18 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 @Service
-@ConditionalOnProperty(value = "gcs.enabled", havingValue = "true")
-public class GcsImageStorage implements ImageStorage{
+@ConditionalOnProperty(prefix = "app", name = "storage", havingValue = "gcs")
+@RequiredArgsConstructor
+public class GcsImageStorage implements ImageStorage {
 
     private final Storage storage;
-    private final String bucket;
 
-    public GcsImageStorage(
-            Storage storage,
-            @Value("${spring.cloud.gcp.storage.bucket}") String bucket) {
-        this.storage = StorageOptions.getDefaultInstance().getService();
-        this.bucket = bucket;
-    }
+    /**
+     * application(-cloud).yml의 gcs.bucket 값을 사용
+     * (우리가 통일한 키: gcs.bucket)
+     */
+    @Value("${gcs.bucket}")
+    private String bucket;
 
     @Override
     public String upload(MultipartFile file) {
@@ -32,9 +33,11 @@ public class GcsImageStorage implements ImageStorage{
             BlobInfo blobInfo = BlobInfo.newBuilder(BlobId.of(bucket, objectName))
                     .setContentType(file.getContentType())
                     .build();
+
             storage.create(blobInfo, file.getBytes());
-            // 퍼블릭 접근/서명 URL 정책에 따라 URL 생성 방식 조정
-            return String.format("https://storage.googleapis.com/%s/%s", bucket, objectName);
+
+            // 공개 버킷이라면 아래 URL로 바로 접근 가능
+            return "https://storage.googleapis.com/" + bucket + "/" + objectName;
         } catch (Exception e) {
             throw new RuntimeException("GCS 업로드 실패", e);
         }
