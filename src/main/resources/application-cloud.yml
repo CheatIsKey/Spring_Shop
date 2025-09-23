@@ -1,17 +1,7 @@
-# src/main/resources/application-cloud.yml  (배포 전용)
 spring:
-  cloud:
-    gcp:
-      storage:
-        bucket: ${GCS_BUCKET}
   config:
     activate:
       on-profile: cloud
-  flyway:
-    enabled: true
-    default-schema: public
-    schemas: public
-    create-schemas: true
 
   datasource:
     url: jdbc:postgresql://google/${DB_NAME}?socketFactory=com.google.cloud.sql.postgres.SocketFactory&cloudSqlInstance=${INSTANCE_CONNECTION_NAME}
@@ -29,13 +19,28 @@ spring:
     defer-datasource-initialization: false
     properties:
       hibernate:
+        # dialect 지정은 없어도 되지만 있어도 무해
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         default_batch_fetch_size: 100
+
+  flyway:
+    enabled: true
+    default-schema: public
+    schemas: public
+    create-schemas: true
+
   sql:
     init:
       mode: never
 
-gcs:
-  enabled: true
+# WebConfig가 cloud에서도 ${file.upload-dir}를 참조하므로 값은 둔다(실제 저장은 GCS가 하더라도).
+file:
+  upload-dir: /tmp/uploads
 
+app:
+  storage: gcs
+
+gcs:
+  bucket: ${GCS_BUCKET}
+  enabled: true

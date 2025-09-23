@@ -3,6 +3,7 @@ package capstone.capstone_shop.service.storage;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ public class GcsImageStorage implements ImageStorage{
     public GcsImageStorage(
             Storage storage,
             @Value("${spring.cloud.gcp.storage.bucket}") String bucket) {
-        this.storage = storage;
+        this.storage = StorageOptions.getDefaultInstance().getService();
         this.bucket = bucket;
     }
 
