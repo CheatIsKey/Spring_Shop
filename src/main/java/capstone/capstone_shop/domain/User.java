@@ -41,9 +41,9 @@ public class User {
     @Enumerated(value = EnumType.STRING)
     private UserRole role;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
-            name = "FAVORITE_CART",
+            name = "favorite_cart",
             joinColumns = @JoinColumn(name = "user_id")
     )
     @Column(name = "favorite")
