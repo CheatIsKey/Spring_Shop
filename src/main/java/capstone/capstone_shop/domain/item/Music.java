@@ -2,7 +2,7 @@ package capstone.capstone_shop.domain.item;
 
 import jakarta.persistence.Entity;
 
-@Entity
+//@Entity
 public class Music extends Item {
 
     protected Music() {}

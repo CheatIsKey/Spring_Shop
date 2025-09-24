@@ -2,7 +2,7 @@ package capstone.capstone_shop.domain.item;
 
 import jakarta.persistence.Entity;
 
-@Entity
+//@Entity
 public class Game extends Item {
 
     public Game(String name, int price, int stockQuantity, String imageUrl) {
