@@ -12,13 +12,14 @@ import java.nio.file.Paths;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Value("${file.upload-dir}")
+    @Value("${file.upload-dir:/tmp/uploads}")
     private String uploadDir;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         Path path = Paths.get(uploadDir).toAbsolutePath().normalize();
-        String location = "file:" + path.toString() + "/";
+        String location = "file:" + path + "/";
+
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations(location)
                 .setCachePeriod(3600);
@@ -28,7 +29,12 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LoginCheck())
                 .addPathPatterns("/**")
-                .excludePathPatterns("/", "/login", "/users/new", "/css/**", "/js/**", "/images/**", "/webjars/**", "/uploads/**");
+                .excludePathPatterns(
+                        "/", "/login", "/logout", "/users/new",
+                        "/error", "/favicon.ico",
+                        "/css/**", "/js/**", "/images/**", "/webjars/**",
+                        "/uploads/**"
+                );
 
         registry.addInterceptor(new AdminCheck())
                 .addPathPatterns("/admin/**");
