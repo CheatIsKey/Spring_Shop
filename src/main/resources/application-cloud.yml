@@ -2,6 +2,11 @@ spring:
   config:
     activate:
       on-profile: cloud
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          max-age: 604800
 
   datasource:
     url: jdbc:postgresql://google/${DB_NAME}?socketFactory=com.google.cloud.sql.postgres.SocketFactory&cloudSqlInstance=${INSTANCE_CONNECTION_NAME}
@@ -16,13 +21,20 @@ spring:
       max-lifetime: 1800000
 
   jpa:
-    defer-datasource-initialization: false
+    # 하이버네이트가 validate/update 등으로 스키마를 검사/수정하지 않게 확실히 차단
+    hibernate:
+      ddl-auto: none
+    # 컨트롤러/뷰에서 지연로딩 시 세션 열어두지 않음(이미 환경변수로도 주입했지만 여기서도 고정)
+    open-in-view: false
     properties:
       hibernate:
-        # dialect 지정은 없어도 되지만 있어도 무해
+        # dialect은 명시해도/안해도 무방
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         default_batch_fetch_size: 100
+        # 일부 라이브러리가 hbm2ddl.auto를 직접 참조하는 경우까지 차단
+        hbm2ddl:
+          auto: none
 
   flyway:
     enabled: true
@@ -34,16 +46,25 @@ spring:
     init:
       mode: never
 
-# WebConfig가 cloud에서도 ${file.upload-dir}를 참조하므로 값은 둔다(실제 저장은 GCS가 하더라도).
+  cloud:
+    gcp:
+      storage:
+        # ★ Spring Cloud GCP가 요구하는 공식 키 (빈 주입 실패 원인 제거)
+        bucket: ${GCS_BUCKET}
+
+# 기존 WebConfig가 참조하므로 유지(실제 저장은 GCS가 하더라도 경로 맵핑용)
 file:
   upload-dir: /tmp/uploads
 
+# 앱 내부 커스텀 프로퍼티(유지)
 app:
   storage: gcs
 
+# 코드 어딘가에서 ${gcs.bucket}을 직접 참조하는 경우 대비(둘 다 제공)
 gcs:
   bucket: ${GCS_BUCKET}
   enabled: true
 
 server:
   port: ${PORT:8080}
+
