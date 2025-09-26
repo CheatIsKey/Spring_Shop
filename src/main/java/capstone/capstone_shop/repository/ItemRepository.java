@@ -9,18 +9,29 @@ import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    @Query("select i.id from Item i ")
+    @Query("select i.id from Item i")
     List<Long> findAllItemIds();
 
-    @Query("select distinct i from Item i join i.categoryItems ci " +
-            "where ci.category.id = :catId")
+    // 특정 카테고리의 아이템 목록을 화면에서 곧바로 쓰려면 연관까지 미리 로딩
+    @Query("""
+      select distinct i
+      from Item i
+      join fetch i.categoryItems ci
+      join fetch ci.category c
+      where c.id = :catId
+      order by i.id desc
+    """)
     List<Item> findByCategoryId(@Param("catId") Long categoryId);
 
     List<Item> findByNameContaining(String name);
 
-      // 상품 검색 구버전 //
-//    @Query("select i from Item i where i.name Like :name")
-//    List<Item> findByContainingName(@Param("name") String name);
-
-
+    // 아이템 전체 목록 화면(아이템 + 소속 카테고리들까지)
+    @Query("""
+      select distinct i
+      from Item i
+      left join fetch i.categoryItems ci
+      left join fetch ci.category c
+      order by i.id desc
+    """)
+    List<Item> findAllWithCategory();
 }

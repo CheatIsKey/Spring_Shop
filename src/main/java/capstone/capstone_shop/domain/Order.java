@@ -2,7 +2,6 @@ package capstone.capstone_shop.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import org.aspectj.weaver.ast.Or;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,13 +34,11 @@ public class Order {
 
     private Order(User user, Delivery delivery, List<OrderItem> items) {
         this.user = user;
-        this.delivery = delivery;
         this.status = OrderStatus.ORDER;
         this.orderDate = LocalDateTime.now();
 
-        delivery.assignOrder(this);
-        for (OrderItem oi : items)
-            addOrderItem(oi);
+        setDelivery(delivery);
+        for (OrderItem oi : items) addOrderItem(oi);
     }
 
     public static Order create(User user, Delivery delivery, List<OrderItem> items) {
@@ -62,6 +59,13 @@ public class Order {
         this.status = OrderStatus.CANCEL;
         for (OrderItem oi : orderItems) {
             oi.cancel();
+        }
+    }
+
+    public void setDelivery(Delivery delivery) {
+        this.delivery = delivery;
+        if (delivery != null && delivery.getOrder() != this) {
+            delivery.assignOrder(this);
         }
     }
 

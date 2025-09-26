@@ -23,6 +23,10 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
+    public List<Category> findAllWithItems() {
+        return categoryRepository.findAllWithItems(); // fetch join 메서드
+    }
+
     public List<CategoryView> findAllDto() {
         List<Category> all = categoryRepository.findAll();
         Map<Long, String> nameById = new ConcurrentHashMap<>();

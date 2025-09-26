@@ -50,12 +50,12 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<Order> myOrders(Long userId) {
-        return orderRepository.findByUserIdOrderByIdDesc(userId);
+        return orderRepository.findSummaryByUserId(userId);
     }
 
     @Transactional(readOnly = true)
     public Order getOrderDetail(Long orderId, Long userId) throws AccessDeniedException {
-        Order order = orderRepository.findWithItemsAndDeliveryById(orderId)
+        Order order = orderRepository.findDetailById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다."));
 
         if (!order.getUser().getId().equals(userId))

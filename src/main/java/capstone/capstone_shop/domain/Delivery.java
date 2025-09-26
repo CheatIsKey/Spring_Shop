@@ -32,6 +32,9 @@ public class Delivery {
 
     void assignOrder(Order order) {
         this.order = order;
+        if (order != null && order.getDelivery() != this) {
+            order.setDelivery(this);
+        }
     }
 
     public void complete() {

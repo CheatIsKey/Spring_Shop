@@ -25,7 +25,7 @@ public class Main {
                        @RequestParam(value = "q", required = false) String q,
                        Model model, Principal principal) {
 
-        List<Category> categories = categoryService.findAll();
+        List<Category> categories = categoryService.findAllWithItems();
         model.addAttribute("categories", categories);
 
         List<ItemDto> itemDtos;

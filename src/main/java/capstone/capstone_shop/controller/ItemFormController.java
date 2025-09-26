@@ -69,6 +69,6 @@ public class ItemFormController {
         Category_Item ci = new Category_Item(category, item);
         categoryItemRepository.save(ci);
 
-        return "redirect:/";
+        return "redirect:/items";
     }
 }
