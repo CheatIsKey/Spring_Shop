@@ -1,8 +1,13 @@
 package capstone.capstone_shop.domain.item;
 
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import lombok.Getter;
+import lombok.Setter;
 
-//@Entity
+@Entity
+@DiscriminatorValue("MUSIC")
+@Getter @Setter
 public class Music extends Item {
 
     protected Music() {}
