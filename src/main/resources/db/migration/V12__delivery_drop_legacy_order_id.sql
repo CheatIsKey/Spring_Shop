@@ -7,7 +7,7 @@
 ALTER TABLE public.orders
     ADD COLUMN IF NOT EXISTS delivery_id BIGINT;
 
--- 1) 백필: (delivery.order_id -> orders.id) 매핑을 이용해 orders.delivery_id 채움
+-- 1) 백필: (delivery.order_id -> orders.id) 매핑으로 orders.delivery_id 채움
 DO $$
 BEGIN
     IF EXISTS (
@@ -40,18 +40,13 @@ BEGIN
         FOR r IN
             SELECT con.conname
             FROM pg_constraint con
-            JOIN pg_class rel ON rel.oid = con.conrelid
-            JOIN pg_namespace nsp ON nsp.oid = rel.relnamespace
+            JOIN pg_class rel       ON rel.oid = con.conrelid
+            JOIN pg_namespace nsp   ON nsp.oid = rel.relnamespace
+            JOIN LATERAL unnest(con.conkey) WITH ORDINALITY AS cols(attnum, ord) ON true
+            JOIN pg_attribute a     ON a.attrelid = rel.oid AND a.attnum = cols.attnum
             WHERE nsp.nspname = 'public'
               AND rel.relname = 'delivery'
-              AND EXISTS (
-                    SELECT 1
-                    FROM unnest(con.conkey) AS attnum
-                    JOIN pg_attribute a
-                      ON a.attrelid = rel.oid
-                     AND a.attnum   = attnum
-                     AND a.attname  = 'order_id'
-              )
+              AND a.attname = 'order_id'
         LOOP
             EXECUTE format('ALTER TABLE public.delivery DROP CONSTRAINT %I', r.conname);
         END LOOP;
@@ -62,15 +57,12 @@ END$$;
 ALTER TABLE public.delivery
     DROP COLUMN IF EXISTS order_id;
 
--- 4) (보강) FK: orders.delivery_id -> delivery.id
+-- 4) 보강: orders.delivery_id -> delivery.id FK(없으면 추가) + 인덱스
 DO $$
 BEGIN
-    -- 인덱스
     CREATE INDEX IF NOT EXISTS idx_orders_delivery_id ON public.orders(delivery_id);
-    -- FK (없을 때만 추가)
     IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'fk_orders_delivery'
+        SELECT 1 FROM pg_constraint WHERE conname = 'fk_orders_delivery'
     ) THEN
         ALTER TABLE public.orders
             ADD CONSTRAINT fk_orders_delivery
