@@ -28,7 +28,7 @@ public class OrderController {
     private final CartService cartService;
 
     @PostMapping
-    public String placeOrder(@SessionAttribute("loginUser")LoginUserDto loginUserDto,
+    public String placeOrder(@SessionAttribute("loginUser") LoginUserDto loginUserDto,
                              @RequestParam String city,
                              @RequestParam String state,
                              @RequestParam String street,
@@ -50,22 +50,30 @@ public class OrderController {
         return "redirect:/orders/" + orderId;
     }
 
+    //    0926 DTO 전환 시도
+//    @GetMapping("/my")
+//    public String myOrders(@SessionAttribute("loginUser") LoginUserDto loginUserDto, Model model) {
+//
+//        List<Order> orders = orderService.myOrders(loginUserDto.id());
+//        List<OrderRowDto> rows = orders.stream()
+//                .map(o -> new OrderRowDto(
+//                        o.getId(),
+//                        o.totalPrice(),
+//                        o.getOrderDate(),
+//                        o.getStatus().name(),
+//                        o.getDelivery() != null ? o.getDelivery().getStatus().name() : "-"
+//                )).toList();
+//
+//        model.addAttribute("rows", rows);
+//        return "orders/my";
+//    }
     @GetMapping("/my")
     public String myOrders(@SessionAttribute("loginUser") LoginUserDto loginUserDto, Model model) {
-
-        List<Order> orders = orderService.myOrders(loginUserDto.id());
-        List<OrderRowDto> rows = orders.stream()
-                .map(o -> new OrderRowDto(
-                        o.getId(),
-                        o.totalPrice(),
-                        o.getOrderDate(),
-                        o.getStatus().name(),
-                        o.getDelivery() != null ? o.getDelivery().getStatus().name() : "-"
-                )).toList();
-
+        List<OrderRowDto> rows = orderService.myOrderRows(loginUserDto.id()); // ✅ 서비스에서 DTO 반환
         model.addAttribute("rows", rows);
         return "orders/my";
     }
+
 
     @GetMapping("/{orderId}")
     public String detail(@PathVariable Long orderId,
@@ -95,8 +103,11 @@ public class OrderController {
 
     @Getter
     public static class OrderRequest {
-        @NotBlank private String city;
-        @NotBlank private String state;
-        @NotBlank private String street;
+        @NotBlank
+        private String city;
+        @NotBlank
+        private String state;
+        @NotBlank
+        private String street;
     }
 }

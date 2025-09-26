@@ -4,6 +4,7 @@ import capstone.capstone_shop.domain.*;
 import capstone.capstone_shop.domain.cart.Cart;
 import capstone.capstone_shop.domain.cart.CartItem;
 import capstone.capstone_shop.domain.item.Item;
+import capstone.capstone_shop.dto.OrderRowDto;
 import capstone.capstone_shop.repository.ItemRepository;
 import capstone.capstone_shop.repository.OrderRepository;
 import capstone.capstone_shop.repository.UserRepository;
@@ -46,6 +47,20 @@ public class OrderService {
 
         orderRepository.save(order);
         return order.getId();
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderRowDto> myOrderRows(Long userId) {
+        List<Order> orders = orderRepository.findSummaryByUserId(userId); // 이미 fetch join 완료
+        // 트랜잭션 안에서 DTO 변환을 끝낸다
+        return orders.stream()
+                .map(o -> new OrderRowDto(
+                        o.getId(),
+                        o.totalPrice(),
+                        o.getOrderDate(),
+                        o.getStatus().name(),
+                        (o.getDelivery() != null ? o.getDelivery().getStatus().name() : "-")
+                )).toList();
     }
 
     @Transactional(readOnly = true)

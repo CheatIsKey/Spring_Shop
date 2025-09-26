@@ -43,5 +43,4 @@ public class Main {
         model.addAttribute("isLoggedIn", principal != null);
         return "home";
     }
-
 }
