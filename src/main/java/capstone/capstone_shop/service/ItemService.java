@@ -1,8 +1,12 @@
 package capstone.capstone_shop.service;
 
+import capstone.capstone_shop.domain.Category;
+import capstone.capstone_shop.domain.Category_Item;
 import capstone.capstone_shop.domain.item.Item;
 import capstone.capstone_shop.dto.ItemDto;
 import capstone.capstone_shop.exception.NotFoundException;
+import capstone.capstone_shop.repository.CategoryItemRepository;
+import capstone.capstone_shop.repository.CategoryRepository;
 import capstone.capstone_shop.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,21 @@ import java.util.stream.Collectors;
 public class ItemService {
 
     private final ItemRepository itemRepository;
+    private final CategoryRepository categoryRepository;
+    private final CategoryItemRepository categoryItemRepository;
+
+    @Transactional
+    public Long saveItemWithCategory(Item item, Long categoryId) {
+        itemRepository.save(item);
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다. id=" + categoryId));
+
+        Category_Item link = new Category_Item(category, item);
+        categoryItemRepository.save(link);
+
+        return item.getId();
+    }
 
     @Transactional
     public void saveItem(Item item) {

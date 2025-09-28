@@ -64,10 +64,7 @@ public class ItemFormController {
                 throw new IllegalArgumentException("지원하지 않는 카테고리입니다.");
         }
 
-        itemService.saveItem(item);
-
-        Category_Item ci = new Category_Item(category, item);
-        categoryItemRepository.save(ci);
+        itemService.saveItemWithCategory(item, form.getCategoryId());
 
         return "redirect:/items";
     }
