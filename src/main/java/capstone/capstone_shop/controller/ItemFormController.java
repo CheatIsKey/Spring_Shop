@@ -18,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 
@@ -39,7 +40,8 @@ public class ItemFormController {
     }
 
     @PostMapping("/items/new")
-    public String createItem(@ModelAttribute ItemForm form) throws IOException {
+    public String createItem(@ModelAttribute ItemForm form,
+                             RedirectAttributes ra) throws IOException {
 
         String imageUrl = imageStorage.upload(form.getImage());
 
@@ -66,6 +68,7 @@ public class ItemFormController {
 
         itemService.saveItemWithCategory(item, form.getCategoryId());
 
-        return "redirect:/items";
+        ra.addFlashAttribute("toast", "상품이 등록되었습니다.");
+        return "redirect:/";
     }
 }
