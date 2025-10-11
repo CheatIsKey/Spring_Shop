@@ -69,7 +69,7 @@ public class OrderController {
 //    }
     @GetMapping("/my")
     public String myOrders(@SessionAttribute("loginUser") LoginUserDto loginUserDto, Model model) {
-        List<OrderRowDto> rows = orderService.myOrderRows(loginUserDto.id()); // ✅ 서비스에서 DTO 반환
+        List<OrderRowDto> rows = orderService.myOrderRows(loginUserDto.id());
         model.addAttribute("rows", rows);
         return "orders/my";
     }

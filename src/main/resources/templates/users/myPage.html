@@ -1,31 +1,49 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>마이페이지</title>
-  <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>마이페이지</title>
+    <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet" />
 </head>
 <body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand font-weight-bold" th:href="@{/}">Shopping Mall</a>
+</nav>
+
 <div class="container mt-5">
-  <h2>안녕하세요, <span th:text="${loginUser.name}">사용자</span>님!</h2>
-  <ul class="list-group mt-4">
-    <li class="list-group-item">
-      <a th:href="@{/users/{id}/edit(id=${loginUser.id})}">
-        회원 정보 수정
-      </a>
-    </li>
-    <li class="list-group-item">
-      <a th:href="@{/orders/my}">주문 내역 보기</a>
-    </li>
-    <li class="list-group-item">
-      <a th:href="@{/items/new}">
-        상품 등록
-      </a>
-    </li>
-  </ul>
-  <div class="mt-4">
-    <a th:href="@{/}" class="btn btn-secondary">홈으로 돌아가기</a>
-  </div>
+    <h2>
+        안녕하세요, <span th:text="${loginUser.name()}">사용자</span>님!
+    </h2>
+
+    <ul class="list-group mt-4">
+        <li class="list-group-item">
+            <a th:href="@{/users/{id}/edit(id=${loginUser.id()})}">
+                회원 정보 수정
+            </a>
+        </li>
+        <li class="list-group-item">
+            <a th:href="@{/orders/my}">주문 내역 보기</a>
+        </li>
+        <!-- 상품 등록: 기존 항목 복구 -->
+        <li class="list-group-item">
+            <a th:href="@{/items/new}">
+                상품 등록
+            </a>
+        </li>
+        <!-- 고객센터: 문의하기 / 내 문의 목록 -->
+        <li class="list-group-item">
+            <a th:href="@{/support/new}">고객센터 문의하기</a>
+        </li>
+        <li class="list-group-item">
+            <a th:href="@{/support}">고객센터 (내 문의 목록)</a>
+        </li>
+    </ul>
+
+    <div class="mt-4">
+        <a th:href="@{/}" class="btn btn-secondary">홈으로 돌아가기</a>
+    </div>
 </div>
 
 <script th:src="@{/webjars/jquery/3.5.1/jquery.min.js}"></script>

@@ -1,74 +1,97 @@
 package capstone.capstone_shop.controller;
 
 import capstone.capstone_shop.domain.Category;
-import capstone.capstone_shop.domain.Category_Item;
 import capstone.capstone_shop.domain.item.Game;
 import capstone.capstone_shop.domain.item.Item;
 import capstone.capstone_shop.domain.item.Movie;
 import capstone.capstone_shop.domain.item.Music;
 import capstone.capstone_shop.dto.ItemForm;
-import capstone.capstone_shop.repository.CategoryItemRepository;
 import capstone.capstone_shop.repository.CategoryRepository;
-import capstone.capstone_shop.service.GcsUploader;
 import capstone.capstone_shop.service.ItemService;
 import capstone.capstone_shop.service.storage.ImageStorage;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/items")
 public class ItemFormController {
 
     private final ItemService itemService;
     private final ImageStorage imageStorage;
     private final CategoryRepository categoryRepository;
-    private final CategoryItemRepository categoryItemRepository;
 
-    @GetMapping("/items/new")
-    public String createForm(Model model){
-        model.addAttribute("itemForm", new ItemForm());
-        model.addAttribute("categories", categoryRepository.findAll());
+    /** 모든 뷰에서 사용하도록 카테고리 목록 주입 */
+    @ModelAttribute("categories")
+    public List<Category> categories() {
+        return categoryRepository.findAll();
+    }
 
+    /** 폼 바인딩 대상 보장 (Thymeleaf에서 th:object가 null이면 500) */
+    @GetMapping("/new")
+    public String createForm(@ModelAttribute("itemForm") ItemForm form) {
         return "items/newItems";
     }
 
-    @PostMapping("/items/new")
-    public String createItem(@ModelAttribute ItemForm form,
-                             RedirectAttributes ra) throws IOException {
-
-        String imageUrl = imageStorage.upload(form.getImage());
-
-        Category category = categoryRepository.findById(form.getCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
-
-        Item item;
-        switch (category.getName()) {
-            case "게임":
-                item = new Game(form.getName(), form.getPrice(), form.getStockQuantity(),
-                        imageUrl);
-                break;
-            case "영화":
-                item = new Movie(form.getName(), form.getPrice(), form.getStockQuantity(),
-                        imageUrl);
-                break;
-            case "음악":
-                item = new Music(form.getName(), form.getPrice(), form.getStockQuantity(),
-                        imageUrl);
-                break;
-            default:
-                throw new IllegalArgumentException("지원하지 않는 카테고리입니다.");
+    @PostMapping("/new")
+    public String createItem(@Valid @ModelAttribute("itemForm") ItemForm form,
+                             BindingResult binding,
+                             Model model,
+                             RedirectAttributes ra) {
+        // 파일 검증
+        if (form.getImage() == null || form.getImage().isEmpty()) {
+            binding.rejectValue("image", "NotEmpty", "이미지를 업로드해 주세요.");
         }
 
-        itemService.saveItemWithCategory(item, form.getCategoryId());
+        if (binding.hasErrors()) {
+            return "items/newItems";
+        }
 
+        // 업로드
+        final String imageUrl;
+        try {
+            imageUrl = imageStorage.upload(form.getImage());
+        } catch (RuntimeException e) {
+            binding.reject("imageUploadFail", "이미지 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+            return "items/newItems";
+        }
+        if (imageUrl == null || imageUrl.isBlank()) {
+            binding.reject("imageUploadFail", "이미지 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+            return "items/newItems";
+        }
+
+        // 카테고리 확인
+        Category category = categoryRepository.findById(form.getCategoryId()).orElse(null);
+        if (category == null) {
+            binding.rejectValue("categoryId", "NotFound", "존재하지 않는 카테고리입니다.");
+            return "items/newItems";
+        }
+
+        // 카테고리에 맞는 서브클래스 생성
+        Item item;
+        switch (category.getName()) {
+            case "게임" -> item = new Game(form.getName(), form.getPrice(), form.getStockQuantity(), imageUrl);
+            case "영화" -> item = new Movie(form.getName(), form.getPrice(), form.getStockQuantity(), imageUrl);
+            case "음악" -> item = new Music(form.getName(), form.getPrice(), form.getStockQuantity(), imageUrl);
+            default -> {
+                binding.rejectValue("categoryId", "Unsupported", "지원하지 않는 카테고리입니다.");
+                return "items/newItems";
+            }
+        }
+
+        // 상세 내용
+        item.setContent(form.getContent());
+
+        Long itemId = itemService.saveItemWithCategory(item, form.getCategoryId());
         ra.addFlashAttribute("toast", "상품이 등록되었습니다.");
-        return "redirect:/";
+        return "redirect:/items/" + itemId;
     }
 }

@@ -21,21 +21,24 @@ public class CartController {
     private final CartService cartService;
 
     @GetMapping
-    public String view(HttpSession session, Model model,
-                       @ModelAttribute String toast,
-                       @ModelAttribute String error) {
+    public String view(HttpSession session, Model model) {
         Cart cart = cartService.getCart(session);
         model.addAttribute("cart", cart);
         return "cart/cart";
     }
 
     @PostMapping("/add")
-    public String add(HttpSession session, @ModelAttribute @Validated AddForm form,
+    public String add(HttpSession session,
+                      @ModelAttribute @Validated AddForm form,
                       @RequestParam(required = false, defaultValue = "/cart") String redirectURL,
                       RedirectAttributes ra) {
-        try{
+        try {
             cartService.add(session, form.itemId(), form.quantity());
-            ra.addFlashAttribute("toast", "장바구니에 담았습니다.");
+
+            String toastHtml = "장바구니에 담았습니다. "
+                    + "<a href='/cart' class='alert-link ml-2'>장바구니로 이동</a>";
+            ra.addFlashAttribute("toast", toastHtml);
+
         } catch (IllegalArgumentException | IllegalStateException e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -43,7 +46,8 @@ public class CartController {
     }
 
     @PostMapping("/change")
-    public String change(HttpSession session, @ModelAttribute @Validated ChangeForm form,
+    public String change(HttpSession session,
+                         @ModelAttribute @Validated ChangeForm form,
                          RedirectAttributes ra) {
         try {
             cartService.changeQuantity(session, form.itemId(), form.quantity());

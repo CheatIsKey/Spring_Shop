@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    // 주문 목록: 총액 계산에 orderItems 필요 → 함께 fetch
+    // 주문 목록: 총액 계산에 orderItems 필요 → fetch
     @Query("""
       select distinct o
       from Order o
@@ -22,7 +22,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     """)
     List<Order> findSummaryByUserId(@Param("userId") Long userId);
 
-    // 주문 상세: 그대로 OK (이미 전부 fetch)
     @Query("""
       select distinct o
       from Order o

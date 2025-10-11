@@ -32,6 +32,11 @@ public abstract class Item {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Lob
+    @Column(name = "content", columnDefinition = "TEXT")
+    @Setter
+    private String content;
+
     @OneToMany(mappedBy = "item")
     private List<Category_Item> categoryItems = new ArrayList<>();
 
@@ -42,6 +47,11 @@ public abstract class Item {
         this.price = price;
         this.stockQuantity = stockQuantity;
         this.imageUrl = imageUrl;
+    }
+
+    public Item(String name, int price, int stockQuantity, String imageUrl, String content) {
+        this(name, price, stockQuantity, imageUrl);
+        this.content = content;
     }
 
     public void addStock(int quantity) {
@@ -55,5 +65,4 @@ public abstract class Item {
         }
         this.stockQuantity -= quantity;
     }
-
 }

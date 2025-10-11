@@ -1,8 +1,6 @@
 package capstone.capstone_shop.dto;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,7 +13,7 @@ public class ItemForm {
     @Min(0)
     private int price;
 
-    @Min(0)
+    @Min(1)
     private int stockQuantity;
 
     @NotNull
@@ -23,4 +21,8 @@ public class ItemForm {
 
     @NotNull
     private Long categoryId;
+
+    @NotBlank
+    @Size(max = 20000)
+    private String content;
 }

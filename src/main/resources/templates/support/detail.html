@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>문의 상세</title>
+
+    <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+
+    <style>
+        .badge-status { font-size: 0.9rem; }
+        .reply-bubble { border-radius: 12px; padding: 12px 14px; }
+        .reply-user   { background: #f8f9fa; }
+        .reply-staff  { background: #e9f7ff; border-left: 4px solid #0d6efd; }
+        .attachment-list li { margin-bottom: 4px; }
+        .meta { color:#6c757d; font-size: .9rem; }
+        .content-box { white-space: pre-wrap; }
+        .sticky-actions { position: sticky; top: 0; z-index: 5; background: #fff; padding-top: .75rem;}
+    </style>
+</head>
+<body>
+
+<!-- 네비게이션이 따로 없다면 아래를 유지, 공용 레이아웃이 있으면 그걸 사용 -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand font-weight-bold" th:href="@{/}">Shopping Mall</a>
+</nav>
+
+<div class="container my-4">
+
+    <!-- 상단 액션(목록으로) + 토스트(알림) -->
+    <div class="d-flex justify-content-between align-items-center sticky-actions">
+        <h3 class="mb-0">문의 상세</h3>
+
+        <div class="d-flex align-items-center">
+            <a th:href="@{/support}" class="btn btn-outline-secondary">목록으로</a>
+        </div>
+    </div>
+
+    <!-- Flash 메시지 -->
+    <div th:if="${toast}" class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        <span th:text="${toast}">완료 메시지</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+        <span th:text="${error}">에러 메시지</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <!-- 본문 카드 -->
+    <div class="card shadow-sm mt-3" th:if="${ticket != null}">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
+            <div class="mb-2 mb-sm-0">
+                <span class="badge badge-secondary mr-2" th:text="${ticket.category()}">CATEGORY</span>
+                <span th:if="${ticket.isPrivate()}" class="badge badge-dark mr-2">비공개</span>
+                <span class="badge badge-status"
+                      th:classappend="${ticket.status().name() == 'OPEN' ? 'badge-info' :
+                               (ticket.status().name() == 'ANSWERED' ? 'badge-success' :
+                                (ticket.status().name() == 'CLOSED' ? 'badge-secondary' : 'badge-light'))}"
+                      th:text="${ticket.status()}">STATUS</span>
+            </div>
+            <div class="meta">
+                <span th:text="${#temporals.format(ticket.createdAt(), 'yyyy-MM-dd HH:mm')}">2025-01-01 12:00</span>
+                <span th:if="${ticket.updatedAt() != null}">
+          · 수정:
+          <span th:text="${#temporals.format(ticket.updatedAt(), 'yyyy-MM-dd HH:mm')}">2025-01-02 09:00</span>
+        </span>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <h4 class="card-title mb-2" th:text="${ticket.title()}">제목</h4>
+            <div class="meta mb-3">
+                작성자:
+                <strong th:text="${ticket.userName()}">사용자명</strong>
+                <span class="text-muted ml-2">#<span th:text="${ticket.id()}">1</span></span>
+            </div>
+
+            <!-- 본문 -->
+            <div class="content-box border rounded p-3" th:text="${ticket.content()}">
+                문의 내용이 표시됩니다.
+            </div>
+
+            <!-- 첨부파일 -->
+            <div class="mt-3" th:if="${ticket.attachments() != null and !ticket.attachments().isEmpty()}">
+                <h6 class="mb-2">첨부파일</h6>
+                <ul class="attachment-list pl-3">
+                    <li th:each="att : ${ticket.attachments()}">
+                        <a th:href="${att.url()}" th:text="${att.fileName()}" target="_blank" rel="noopener">파일명</a>
+                        <small class="text-muted ml-1"
+                               th:text="${att.mimeType()}">mime/type</small>
+                        <small class="text-muted ml-1"
+                               th:text="${#numbers.formatDecimal(att.size, 1, 0)} + ' bytes'">0 bytes</small>
+                    </li>
+                </ul>
+            </div>
+
+            <hr/>
+
+            <!-- 답변/댓글 -->
+            <h5 class="mb-3">답변</h5>
+            <div th:if="${ticket.replies() == null || ticket.replies().isEmpty()}" class="text-muted">
+                아직 등록된 답변이 없습니다.
+            </div>
+
+            <div class="d-flex flex-column">
+                <div th:each="r : ${ticket.replies()}" class="mb-3">
+                    <div class="reply-bubble"
+                         th:classappend="${r.isStaffReply()} ? ' reply-staff' : ' reply-user'">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong th:text="${r.authorName()}">작성자</strong>
+                            <small class="text-muted"
+                                   th:text="${#temporals.format(r.createdAt(), 'yyyy-MM-dd HH:mm')}">2025-01-01 12:00</small>
+                        </div>
+                        <div class="content-box" th:text="${r.content()}">답변 내용</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사용자 화면에는 답글/상태 변경 폼 없음 (관리자 전용은 admin_detail.html 사용) -->
+        </div>
+    </div>
+
+    <div th:if="${ticket == null}" class="alert alert-warning mt-3">
+        표시할 문의가 없습니다.
+    </div>
+
+</div>
+
+<script th:src="@{/webjars/jquery/3.5.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.5.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

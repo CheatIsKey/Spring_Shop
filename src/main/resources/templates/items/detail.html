@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${item.name} + ' - 상품 상세'">상품 상세</title>
+
+    <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+
+    <style>
+        .detail-img {
+          width: 100%;
+          height: 520px;            /* 보기 좋게 살짝 키움 */
+          object-fit: contain;       /* 비율 유지 */
+          background: #2f2f2f;       /* 이미지 여백 배경 */
+          border-radius: .25rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-4">
+
+    <!-- 상단 토스트(성공 메시지) -->
+    <div class="alert alert-success alert-dismissible fade show"
+         role="alert"
+         th:if="${toast != null}">
+        <span th:utext="${toast}">장바구니에 담았습니다.</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="닫기">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <!-- 헤더: 제목/뱃지 + 우측 '목록으로' -->
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <h2 class="mb-2" th:text="${item.name}">상품명</h2>
+            <span class="badge badge-info" th:if="${categoryName != null}"
+                  th:text="${categoryName}">카테고리</span>
+        </div>
+        <div>
+            <a class="btn btn-outline-secondary" th:href="@{/}">목록으로</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 좌측 이미지 -->
+        <div class="col-md-6 mb-4">
+            <img class="detail-img"
+                 th:if="${item.imageUrl != null}"
+                 th:src="@{${item.imageUrl}}"
+                 th:alt="${item.name}"/>
+            <img class="detail-img"
+                 th:if="${item.imageUrl == null}"
+                 th:src="@{/images/default.png}"
+                 th:alt="${item.name}"/>
+        </div>
+
+        <!-- 우측 정보 -->
+        <div class="col-md-6">
+
+            <div class="mb-2">
+                <a th:href="@{'/items/' + ${item.id}}"
+                   class="text-decoration-none">
+                    <h3 class="text-primary mb-0"
+                        th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' 원'">0 원</h3>
+                </a>
+            </div>
+
+            <p class="text-muted">
+                재고:
+                <strong th:text="${item.stockQuantity}">0</strong> 개
+            </p>
+
+            <!-- 장바구니 담기(재고 아래) -->
+            <div class="mb-4">
+                <!-- 로그인 O : 폼 제출 -->
+                <form th:if="${session.loginUser != null}"
+                      th:action="@{/cart/add}"
+                      method="post"
+                      class="form-inline">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <input type="hidden" name="itemId" th:value="${item.id}"/>
+                    <!-- 성공 시 현재 상세 페이지로 리다이렉트 → 토스트 노출 -->
+                    <input type="hidden" name="redirectURL" th:value="@{'/items/' + ${item.id}}"/>
+
+                    <label class="sr-only" for="qty">수량</label>
+                    <input id="qty" name="quantity" type="number"
+                           class="form-control mr-2" min="1"
+                           th:attr="max=${item.stockQuantity}"
+                           value="1" style="width:120px"/>
+
+                    <button type="submit" class="btn btn-primary">장바구니 담기</button>
+                </form>
+
+                <!-- 로그인 X : 로그인 유도 -->
+                <div th:if="${session.loginUser == null}">
+                    <a class="btn btn-primary" th:href="@{/login}">장바구니 담기</a>
+                    <small class="text-muted ml-2">로그인 후 이용해 주세요</small>
+                </div>
+            </div>
+
+            <hr/>
+
+            <h5 class="mt-4 mb-3">상품 설명</h5>
+            <div class="form-control" style="min-height:120px"
+                 th:text="${item.content}">설명</div>
+        </div>
+    </div>
+
+</div>
+
+<script th:src="@{/webjars/jquery/3.5.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.5.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

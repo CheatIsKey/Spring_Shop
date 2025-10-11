@@ -51,5 +51,4 @@ public class OrderItem {
     public long getTotalPrice() {
         return orderPrice * count;
     }
-
 }
