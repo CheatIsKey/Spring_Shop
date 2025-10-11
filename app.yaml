@@ -1,3 +1,4 @@
+# app.yaml
 runtime: java17
 env_variables:
   SPRING_PROFILES_ACTIVE: local

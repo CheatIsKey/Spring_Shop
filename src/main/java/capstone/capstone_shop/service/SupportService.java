@@ -5,6 +5,7 @@ import capstone.capstone_shop.dto.*;
 import capstone.capstone_shop.repository.AttachmentRepository;
 import capstone.capstone_shop.repository.SupportReplyRepository;
 import capstone.capstone_shop.repository.SupportTicketRepository;
+import capstone.capstone_shop.service.storage.ImageStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -23,7 +23,9 @@ public class SupportService {
     private final SupportTicketRepository ticketRepo;
     private final SupportReplyRepository replyRepo;
     private final AttachmentRepository attRepo;
-    private final GcsUploader gcsUploader;
+
+    // ✅ GCS 전용 빈 대신 공통 인터페이스 사용
+    private final ImageStorage imageStorage;
 
     public Long createTicket(User user, TicketCreateRequest req) {
         SupportTicket ticket = new SupportTicket(user, req.title(), req.category(), req.content(), req.isPrivate());
@@ -32,7 +34,9 @@ public class SupportService {
             for (MultipartFile file : req.files()) {
                 if (file == null || file.isEmpty()) continue;
                 try {
-                    String url = gcsUploader.uploadFile(file);
+                    // ✅ 로컬/클라우드와 무관하게 동일 호출
+                    String url = imageStorage.upload(file);
+
                     Attachment att = Attachment.of(
                             file.getOriginalFilename(),
                             url,
@@ -40,7 +44,7 @@ public class SupportService {
                             file.getSize()
                     );
                     ticket.addAttachment(att);
-                } catch (IOException e) {
+                } catch (RuntimeException e) {
                     throw new RuntimeException("파일 업로드 실패: " + file.getOriginalFilename(), e);
                 }
             }
@@ -90,32 +94,32 @@ public class SupportService {
         return reply.getId();
     }
 
-   public void changeStatus(Long ticketId, TicketStatus status) {
+    public void changeStatus(Long ticketId, TicketStatus status) {
         int updated = ticketRepo.updateStatus(ticketId, status);
-        if (updated == 0) throw  new IllegalArgumentException("상태 변경 대상이 없습니다.");
-   }
+        if (updated == 0) throw new IllegalArgumentException("상태 변경 대상이 없습니다.");
+    }
 
-   private TicketDetailDto toDetailDto(SupportTicket ticket) {
-       List<AttachmentDto> atts = attRepo.findByTicketId(ticket.getId()).stream()
-               .map(a -> new AttachmentDto(a.getId(), a.getFileName(), a.getUrl(), a.getMimeType(), a.getSize()))
-               .toList();
+    private TicketDetailDto toDetailDto(SupportTicket ticket) {
+        List<AttachmentDto> atts = attRepo.findByTicketId(ticket.getId()).stream()
+                .map(a -> new AttachmentDto(a.getId(), a.getFileName(), a.getUrl(), a.getMimeType(), a.getSize()))
+                .toList();
 
-       List<ReplyDto> replies = replyRepo.findByTicketIdOrderByCreatedAtAsc(ticket.getId()).stream()
-               .map(r -> new ReplyDto(
-                       r.getId(),
-                       r.getAuthor().getId(),
-                       r.getAuthor().getName(),
-                       r.isStaffReply(),
-                       r.getContent(),
-                       r.getCreatedAt(),
-                       r.getUpdatedAt()
-               )).toList();
+        List<ReplyDto> replies = replyRepo.findByTicketIdOrderByCreatedAtAsc(ticket.getId()).stream()
+                .map(r -> new ReplyDto(
+                        r.getId(),
+                        r.getAuthor().getId(),
+                        r.getAuthor().getName(),
+                        r.isStaffReply(),
+                        r.getContent(),
+                        r.getCreatedAt(),
+                        r.getUpdatedAt()
+                )).toList();
 
-       return new TicketDetailDto(
-               ticket.getId(), ticket.getUser().getId(), ticket.getUser().getName(),
-               ticket.getTitle(), ticket.getCategory(), ticket.isPrivate(),
-               ticket.getStatus(), ticket.getContent(), ticket.getCreatedAt(),
-               ticket.getUpdatedAt(), atts, replies
-       );
-   }
+        return new TicketDetailDto(
+                ticket.getId(), ticket.getUser().getId(), ticket.getUser().getName(),
+                ticket.getTitle(), ticket.getCategory(), ticket.isPrivate(),
+                ticket.getStatus(), ticket.getContent(), ticket.getCreatedAt(),
+                ticket.getUpdatedAt(), atts, replies
+        );
+    }
 }
