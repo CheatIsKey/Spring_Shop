@@ -1,6 +1,7 @@
 package capstone.capstone_shop.repository;
 
 import capstone.capstone_shop.domain.Order;
+import capstone.capstone_shop.domain.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,4 +32,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
       where o.id = :id
     """)
     Optional<Order> findDetailById(@Param("id") Long id);
+
+    boolean existsByUser_Id(Long userId);
+    boolean existsByUser_IdAndStatusNot(Long userId, OrderStatus status);
 }

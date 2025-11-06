@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>내 상품 관리</title>
+    <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container mt-5">
+    <h3 class="mb-3">등록한 상품 관리</h3>
+
+    <div th:if="${flashMessage}" class="alert alert-success" th:text="${flashMessage}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <table class="table table-hover">
+        <thead class="thead-light">
+        <tr>
+            <th>ID</th>
+            <th>이미지</th>
+            <th>상품명</th>
+            <th>가격</th>
+            <th>재고</th>
+            <th style="width:160px;">관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="i : ${items}">
+            <td th:text="${i.id}">1</td>
+            <td>
+                <img th:if="${i.imageUrl}" th:src="${i.imageUrl}" alt="" style="height:48px;">
+            </td>
+            <td>
+                <a th:href="@{|/items/${i.id}|}" th:text="${i.name}">상품명</a>
+            </td>
+            <td th:text="${#numbers.formatInteger(i.price, 0)}">0</td>
+            <td th:text="${i.stockQuantity}">0</td>
+            <td class="d-flex">
+                <a th:href="@{|/items/${i.id}/edit|}" class="btn btn-sm btn-primary mr-2">수정</a>
+                <form th:action="@{|/items/${i.id}/delete|}" method="post"
+                      onsubmit="return confirm('해당 상품을 삭제하시겠습니까?');">
+                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn btn-sm btn-danger">삭제</button>
+                </form>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(items)}">
+            <td colspan="6" class="text-center text-muted">등록한 상품이 없습니다.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a th:href="@{/users/mypage}" class="btn btn-secondary">마이페이지로</a>
+</div>
+<script th:src="@{/webjars/bootstrap/4.5.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

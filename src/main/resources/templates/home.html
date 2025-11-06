@@ -21,19 +21,18 @@
             <!-- 카테고리 + 검색 -->
             <li class="nav-item">
                 <form class="form-inline" th:action="@{/}" method="get">
-                    <select class="form-control mr-2" name="category"
-                            th:value="${param.category}"
-                            onchange="this.form.submit()">
-                        <option value="" th:selected="${param.category} == null">전체 카테고리</option>
+                    <select class="form-control mr-2" name="category" onchange="this.form.submit()">
+                        <!-- 여기 value만 일반 속성으로! -->
+                        <option value="" th:selected="${selectedCategoryId == null}">전체 카테고리</option>
                         <option th:each="cat : ${categories}"
                                 th:value="${cat.id}"
                                 th:text="${cat.name}"
-                                th:selected="${param.category} == ${cat.id}">
+                                th:selected="${selectedCategoryId != null and cat.id == selectedCategoryId}">
                         </option>
                     </select>
 
                     <input class="form-control mr-2" type="search" name="q"
-                           th:value="${param.q}" placeholder="상품 검색"/>
+                           th:value="${q}" placeholder="상품 검색"/>
                     <button class="btn btn-light">검색</button>
                 </form>
             </li>

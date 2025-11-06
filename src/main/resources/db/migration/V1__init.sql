@@ -12,31 +12,24 @@ create table if not exists users (
   phone       varchar(50),
   id_user     varchar(50)  not null,
   password    varchar(255),
-
-  -- Embedded Address (User)
   state       varchar(100),
   city        varchar(100),
   street      varchar(200),
-
   role        varchar(20),
   constraint uq_users_id_user unique (id_user),
   constraint ck_users_role check (role in ('USER','ADMIN'))
 );
 
--- 2) DELIVERY (비소유측; FK는 orders.delivery_id가 가짐)
 create table if not exists delivery (
   id     bigserial primary key,
-
-  -- Embedded Address (Delivery)
   state  varchar(100) not null,
   city   varchar(100) not null,
   street varchar(200) not null,
-
   status varchar(20)  not null,
   constraint ck_delivery_status check (status in ('READY','COMP','CANCEL'))
 );
 
--- 3) ITEM (다른 패키지 capstone.capstone_shop.domain.item.Item)
+
 create table if not exists item (
   id        bigserial primary key,
   name      varchar(200) not null,
@@ -47,7 +40,6 @@ create table if not exists item (
   constraint ck_item_stock_nonneg check (stock >= 0)
 );
 
--- 4) CATEGORY (자기참조 트리)
 create table if not exists category (
   id        bigserial primary key,
   name      varchar(100) not null,

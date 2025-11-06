@@ -118,4 +118,30 @@ public class UserFormController {
         model.addAttribute("loginUser", loginUser);
         return "users/myPage";
     }
+
+    // 회원 삭제
+    @PostMapping("/{id}/delete")
+    public String deleteSelf(@PathVariable Long id,
+                             HttpSession session,
+                             RedirectAttributes attrs) {
+        LoginUserDto loginUser = (LoginUserDto) session.getAttribute("loginUser");
+
+        if (loginUser == null || !loginUser.id().equals(id)) {
+            attrs.addFlashAttribute("error", "본인만 탈퇴할 수 있습니다.");
+            return "redirect:/users/mypage";
+        }
+
+        try {
+            userService.deleteSelf(id);
+            session.invalidate();
+            attrs.addFlashAttribute("flashMessage", "회원 탈퇴가 완료되었습니다.");
+            return "redirect:/";
+        } catch (IllegalStateException ex) {
+            attrs.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/users/mypage";
+        } catch (Exception ex) {
+            attrs.addFlashAttribute("error", "탈퇴 처리 중 알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+            return "redirect:/users/mypage";
+        }
+    }
 }

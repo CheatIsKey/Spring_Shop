@@ -1,6 +1,7 @@
 package capstone.capstone_shop.domain.item;
 
 import capstone.capstone_shop.domain.Category_Item;
+import capstone.capstone_shop.domain.User;
 import capstone.capstone_shop.exception.NotEnoughStockException;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -37,8 +38,12 @@ public abstract class Item {
     @Setter
     private String content;
 
-    @OneToMany(mappedBy = "item")
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Category_Item> categoryItems = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "created_by_id", nullable = false)
+    private User createdBy;
 
     protected Item() {};
 
@@ -53,6 +58,16 @@ public abstract class Item {
         this(name, price, stockQuantity, imageUrl);
         this.content = content;
     }
+
+    public void assignCreatedBy(User user) { this.createdBy = user; }
+
+    public void changeName(String name) { this.name = name; }
+
+    public void changePrice(int price) { this.price = price; }
+
+    public void changeStock(int stockQuantity) { this.stockQuantity = stockQuantity; }
+
+    public void changeImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public void addStock(int quantity) {
         this.stockQuantity += quantity;

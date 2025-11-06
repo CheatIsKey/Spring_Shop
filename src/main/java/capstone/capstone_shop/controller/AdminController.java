@@ -2,14 +2,15 @@ package capstone.capstone_shop.controller;
 
 import capstone.capstone_shop.domain.UserRole;
 import capstone.capstone_shop.dto.AdminUserDto;
+import capstone.capstone_shop.dto.LoginUserDto;
 import capstone.capstone_shop.service.AdminService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequiredArgsConstructor
@@ -37,5 +38,32 @@ public class AdminController {
         model.addAttribute("role", role);
 
         return "admin/users";
+    }
+
+    @PostMapping("/users/{userId}/delete")
+    public String deleteUserByAdmin(@PathVariable Long userId,
+                                    HttpSession session,
+                                    @RequestParam(required = false, defaultValue = "") String redirect,
+                                    RedirectAttributes attrs) {
+
+        // 관리자 권한 확인
+        LoginUserDto loginUser = (LoginUserDto) session.getAttribute("loginUser");
+        if (loginUser == null || loginUser.userRole() != UserRole.ADMIN) {
+            attrs.addFlashAttribute("error", "관리자만 접근할 수 있습니다.");
+            return "redirect:/login";
+        }
+
+        try {
+            adminService.deleteUserByAdmin(userId);
+            attrs.addFlashAttribute("flashMessage", "해당 유저를 삭제했습니다.");
+        } catch (IllegalStateException ex) {
+            attrs.addFlashAttribute("error", ex.getMessage());
+        } catch (Exception ex) {
+            attrs.addFlashAttribute("error", "삭제 처리 중 알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        }
+
+        return (redirect != null && !redirect.isBlank())
+                ? "redirect:" + redirect
+                : "redirect:/admin/users";
     }
 }

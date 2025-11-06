@@ -1,13 +1,17 @@
 package capstone.capstone_shop.service;
 
 import capstone.capstone_shop.domain.Address;
+import capstone.capstone_shop.domain.OrderStatus;
 import capstone.capstone_shop.domain.User;
 import capstone.capstone_shop.domain.UserRole;
 import capstone.capstone_shop.dto.CreateUserRequest;
 import capstone.capstone_shop.dto.UpdateUserRequest;
+import capstone.capstone_shop.repository.OrderRepository;
+import capstone.capstone_shop.repository.SupportTicketRepository;
 import capstone.capstone_shop.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +26,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final OrderRepository orderRepository;
+    private final SupportTicketRepository supportTicketRepository;
 
     // 회원 가입
     @Transactional
-    public Long join(User user){
+    public Long join(User user) {
         validateDuplicateUser(user);
         userRepository.save(user);
         return user.getId();
@@ -92,8 +98,8 @@ public class UserService {
 
         String newIdUser = req.getIdUser().trim();
         if (!newIdUser.equals(user.getIdUser())) {
-            userRepository.findByIdUser(newIdUser).ifPresent(u ->{
-                if (!u.getId().equals(user.getId())){
+            userRepository.findByIdUser(newIdUser).ifPresent(u -> {
+                if (!u.getId().equals(user.getId())) {
                     throw new IllegalStateException("이미 존재하는 아이디입니다.");
                 }
             });
@@ -126,4 +132,55 @@ public class UserService {
         }
         return user;
     }
+
+    // 회원 탈퇴(본인)
+    @Transactional
+    public void deleteSelf(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다."));
+
+        if (user.getRole() == UserRole.ADMIN) {
+            throw new IllegalStateException("관리자 계정은 이 경로로 탈퇴할 수 없습니다.");
+        }
+
+        if (orderRepository.existsByUser_IdAndStatusNot(user.getId(), OrderStatus.CANCEL)) {
+            throw new IllegalStateException("진행 중인 주문이 있어 탈퇴할 수 없습니다. 모든 주문을 취소한 뒤 다시 시도하세요.");
+        }
+
+        if (supportTicketRepository.existsByUser_Id(user.getId())) {
+            throw new IllegalStateException("고객센터 문의글이 남아 있어 탈퇴할 수 없습니다. 문의글을 모두 삭제한 뒤 다시 시도하세요.");
+        }
+
+        try {
+            userRepository.delete(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalStateException("연관 데이터로 인해 삭제할 수 없습니다.");
+        }
+    }
+
+    // 관리자에 의한 유저 삭제
+    @Transactional
+    public void deleteByAdmin(Long targetUserId) {
+        User user = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new EntityNotFoundException("대상 유저를 찾을 수 없습니다."));
+
+        if (user.getRole() == UserRole.ADMIN) {
+            throw new IllegalStateException("관리자 계정은 삭제할 수 없습니다.");
+        }
+
+        if (orderRepository.existsByUser_IdAndStatusNot(user.getId(), OrderStatus.CANCEL)) {
+            throw new IllegalStateException("해당 유저는 진행 중인 주문이 있어 삭제할 수 없습니다. 모든 주문이 취소된 후 삭제 가능합니다.");
+        }
+
+        if (supportTicketRepository.existsByUser_Id(user.getId())) {
+            throw new IllegalStateException("고객센터 문의글이 남아 있어 삭제할 수 없습니다. 문의글을 모두 삭제한 뒤 다시 시도하세요.");
+        }
+
+        try {
+            userRepository.delete(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalStateException("연관 데이터로 인해 삭제할 수 없습니다.");
+        }
+    }
+
 }

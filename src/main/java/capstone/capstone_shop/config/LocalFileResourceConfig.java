@@ -17,7 +17,7 @@ public class LocalFileResourceConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 예: /files/support/xxx -> file:/.../shop-uploads/support/xxx
+        // /files/support/xxx -> file:/.../shop-uploads/support/xxx
         String location = Paths.get(uploadBaseDir).toUri().toString();
         registry.addResourceHandler("/files/**")
                 .addResourceLocations(location.endsWith("/") ? location : (location + "/"));

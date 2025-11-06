@@ -6,9 +6,11 @@ import capstone.capstone_shop.domain.item.Item;
 import capstone.capstone_shop.domain.item.Movie;
 import capstone.capstone_shop.domain.item.Music;
 import capstone.capstone_shop.dto.ItemForm;
+import capstone.capstone_shop.dto.LoginUserDto;
 import capstone.capstone_shop.repository.CategoryRepository;
 import capstone.capstone_shop.service.ItemService;
 import capstone.capstone_shop.service.storage.ImageStorage;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -45,12 +47,19 @@ public class ItemFormController {
     public String createItem(@Valid @ModelAttribute("itemForm") ItemForm form,
                              BindingResult binding,
                              Model model,
-                             RedirectAttributes ra) {
+                             RedirectAttributes ra,
+                             HttpSession session) {
+        // 로그인 확인
+        LoginUserDto login = (LoginUserDto) session.getAttribute("loginUser");
+        if (login == null) {
+            ra.addFlashAttribute("error", "로그인 후 이용해 주세요.");
+            return "redirect:/login";
+        }
+
         // 파일 검증
         if (form.getImage() == null || form.getImage().isEmpty()) {
             binding.rejectValue("image", "NotEmpty", "이미지를 업로드해 주세요.");
         }
-
         if (binding.hasErrors()) {
             return "items/newItems";
         }
@@ -90,7 +99,9 @@ public class ItemFormController {
         // 상세 내용
         item.setContent(form.getContent());
 
-        Long itemId = itemService.saveItemWithCategory(item, form.getCategoryId());
+        // ✅ 작성자 정보(로그인 유저)까지 같이 저장
+        Long itemId = itemService.saveItemWithCategoryAndOwner(item, form.getCategoryId(), login.id());
+
         ra.addFlashAttribute("toast", "상품이 등록되었습니다.");
         return "redirect:/items/" + itemId;
     }

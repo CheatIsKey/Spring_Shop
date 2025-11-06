@@ -26,4 +26,6 @@ public interface SupportTicketRepository extends JpaRepository<SupportTicket, Lo
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update SupportTicket t set t.status = :status where t.id = :id")
     int updateStatus(@Param("id") Long id, @Param("status") TicketStatus status);
+
+    boolean existsByUser_Id(Long userId);
 }

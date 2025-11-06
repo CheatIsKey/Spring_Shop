@@ -35,9 +35,7 @@ public class CartController {
         try {
             cartService.add(session, form.itemId(), form.quantity());
 
-            String toastHtml = "장바구니에 담았습니다. "
-                    + "<a href='/cart' class='alert-link ml-2'>장바구니로 이동</a>";
-            ra.addFlashAttribute("toast", toastHtml);
+            ra.addFlashAttribute("toast", "장바구니에 담았습니다.");
 
         } catch (IllegalArgumentException | IllegalStateException e) {
             ra.addFlashAttribute("error", e.getMessage());

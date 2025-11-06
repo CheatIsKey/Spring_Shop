@@ -32,3 +32,6 @@ public class UserRepository_old {
                 .getResultList();
     }
 }
+
+
+

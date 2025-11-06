@@ -17,9 +17,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminService {
 
     private final UserRepository userRepository;
+    private final UserService userService;
 
     public Page<AdminUserDto> search(String word, UserRole role, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
         return userRepository.search(word, role, pageable);
     }
+
+    @Transactional
+    public void deleteUserByAdmin(Long userId) {
+        userService.deleteByAdmin(userId);
+    }
+
+
 }

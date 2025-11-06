@@ -1,85 +1,124 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
-  <meta charset="UTF-8"/>
-  <title>유저 조회</title>
-  <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet"/>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>유저 조회</title>
+    <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet"/>
 </head>
 <body>
 <div class="container mt-5">
-  <h2 class="mb-4">유저 조회</h2>
+    <h2 class="mb-4">유저 조회</h2>
 
-  <!-- 검색/필터 -->
-  <form class="form-inline mb-3" th:action="@{/admin/users}" method="get">
-    <input class="form-control mr-2" type="search" name="word" placeholder="이름/아이디/전화"
-           th:value="${word}">
-    <select class="form-control mr-2" name="role">
-      <option value="" th:selected="${role} == null">전체</option>
-      <option value="CLIENT"  th:selected="${role != null and role.name() == 'CLIENT'}">CLIENT</option>
-      <option value="ADMIN" th:selected="${role != null and role.name() == 'ADMIN'}">ADMIN</option>
-    </select>
-    <button class="btn btn-primary">검색</button>
-    <a class="btn btn-secondary ml-2" th:href="@{/admin/dashboard}">대시보드</a>
-  </form>
+    <!-- Flash alerts -->
+    <div th:if="${flashMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${flashMessage}">성공 메시지</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">에러 메시지</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <!-- // Flash alerts -->
 
-  <!-- 목록 -->
-  <table class="table table-bordered">
-    <thead class="thead-light">
-    <tr>
-      <th>ID</th>
-      <th>아이디</th>
-      <th>이름</th>
-      <th>전화</th>
-      <th>권한</th>
-      <th>주소</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="u : ${users.content}">
-      <td th:text="${u.id}">1</td>
-      <td th:text="${u.idUser}">admin</td>
-      <td th:text="${u.name}">관리자</td>
-      <td th:text="${u.phone}">010-0000-0000</td>
-      <td th:text="${u.role}">ADMIN</td>
-      <td>
-        <span th:text="${u.state}">Seoul</span>
-        <span th:text="${u.city}">Seoul</span>
-        <span th:text="${u.street}">Street</span>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+    <!-- 검색/필터 -->
+    <form class="form-inline mb-3" th:action="@{/admin/users}" method="get">
+        <input class="form-control mr-2" type="search" name="word" placeholder="이름/아이디/전화"
+               th:value="${word}">
+        <select class="form-control mr-2" name="role">
+            <option value="" th:selected="${role} == null">전체</option>
+            <option value="CLIENT" th:selected="${role != null and role.name() == 'CLIENT'}">CLIENT</option>
+            <option value="ADMIN" th:selected="${role != null and role.name() == 'ADMIN'}">ADMIN</option>
+        </select>
+        <button class="btn btn-primary" type="submit">검색</button>
+        <a class="btn btn-secondary ml-2" th:href="@{/admin/dashboard}">대시보드</a>
+    </form>
 
-  <!-- 페이지네이션 -->
-  <nav th:if="${users.totalPages > 1}">
-    <ul class="pagination">
-      <li class="page-item" th:classappend="${users.first}? 'disabled'">
-        <a class="page-link"
-           th:href="@{|/admin/users?page=${users.number - 1}&size=${users.size}&word=${word != null ? word : ''}&role=${role != null ? role.name() : ''}|}">
-          이전
-        </a>
-      </li>
+    <!-- 목록 -->
+    <table class="table table-bordered">
+        <thead class="thead-light">
+        <tr>
+            <th>ID</th>
+            <th>아이디</th>
+            <th>이름</th>
+            <th>전화</th>
+            <th>권한</th>
+            <th>주소</th>
+            <th style="width:120px;">관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="u : ${users.content}">
+            <td th:text="${u.id}">1</td>
+            <td th:text="${u.idUser}">admin</td>
+            <td th:text="${u.name}">관리자</td>
+            <td th:text="${u.phone}">010-0000-0000</td>
+            <td th:text="${u.role}">ADMIN</td>
+            <td>
+                <span th:text="${u.state}">Seoul</span>
+                <span th:text="${u.city}">Seoul</span>
+                <span th:text="${u.street}">Street</span>
+            </td>
+            <td>
+                <form th:if="${u.role != T(capstone.capstone_shop.domain.UserRole).ADMIN}"
+                      th:action="@{/admin/users/{userId}/delete(userId=${u.id})}"
+                      method="post"
+                      class="m-0"
+                      onsubmit="return confirm('해당 유저를 삭제하시겠습니까?');">
 
-      <li class="page-item"
-          th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}"
-          th:classappend="${i == users.number} ? 'active'">
-        <a class="page-link"
-           th:text="${i + 1}"
-           th:href="@{|/admin/users?page=${i}&size=${users.size}&word=${word != null ? word : ''}&role=${role != null ? role.name() : ''}|}">
-          1
-        </a>
-      </li>
+                    <!-- 현재 검색/페이징 상태 보존 -->
+                    <input type="hidden" name="redirect"
+                           th:value="@{|/admin/users?page=${users.number}&size=${users.size}&word=${word != null ? word : ''}&role=${role != null ? role.name() : ''}|}"/>
 
-      <li class="page-item" th:classappend="${users.last}? 'disabled'">
-        <a class="page-link"
-           th:href="@{|/admin/users?page=${users.number + 1}&size=${users.size}&word=${word != null ? word : ''}&role=${role != null ? role.name() : ''}|}">
-          다음
-        </a>
-      </li>
-    </ul>
-  </nav>
+                    <!-- CSRF -->
+                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                    <button type="submit" class="btn btn-sm btn-danger">삭제</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- 페이지네이션 -->
+    <nav th:if="${users.totalPages > 1}">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${users.first}? 'disabled'">
+                <a class="page-link"
+                   th:href="@{|/admin/users?page=${users.number - 1}&size=${users.size}&word=${word != null ? word : ''}&role=${role != null ? role.name() : ''}|}">
+                    이전
+                </a>
+            </li>
+
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}"
+                th:classappend="${i == users.number} ? 'active'">
+                <a class="page-link"
+                   th:text="${i + 1}"
+                   th:href="@{|/admin/users?page=${i}&size=${users.size}&word=${word != null ? word : ''}&role=${role != null ? role.name() : ''}|}">
+                    1
+                </a>
+            </li>
+
+            <li class="page-item" th:classappend="${users.last}? 'disabled'">
+                <a class="page-link"
+                   th:href="@{|/admin/users?page=${users.number + 1}&size=${users.size}&word=${word != null ? word : ''}&role=${role != null ? role.name() : ''}|}">
+                    다음
+                </a>
+            </li>
+        </ul>
+    </nav>
 </div>
 
+<script th:src="@{/webjars/jquery/3.5.1/jquery.min.js}"></script>
 <script th:src="@{/webjars/bootstrap/4.5.2/js/bootstrap.bundle.min.js}"></script>
+<script>
+    // 선택: 알림 자동 숨김(3초 후)
+    $(function(){ setTimeout(function(){ $('.alert').alert('close'); }, 3000); });
+</script>
 </body>
 </html>

@@ -38,8 +38,10 @@ public class Main {
         }
         model.addAttribute("itemDtos", itemDtos);
 
-        model.addAttribute("cartItemCount", 0);
+        model.addAttribute("selectedCategoryId", categoryId);
+        model.addAttribute("q", q);
 
+        model.addAttribute("cartItemCount", 0);
         model.addAttribute("isLoggedIn", principal != null);
         return "home";
     }

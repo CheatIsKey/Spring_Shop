@@ -13,26 +13,39 @@
 </nav>
 
 <div class="container mt-5">
+
+    <!-- Flash alerts -->
+    <div th:if="${flashMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${flashMessage}">성공 메시지</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">에러 메시지</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <!-- // Flash alerts -->
+
     <h2>
         안녕하세요, <span th:text="${loginUser.name()}">사용자</span>님!
     </h2>
 
     <ul class="list-group mt-4">
         <li class="list-group-item">
-            <a th:href="@{/users/{id}/edit(id=${loginUser.id()})}">
-                회원 정보 수정
-            </a>
+            <a th:href="@{/users/{id}/edit(id=${loginUser.id()})}">회원 정보 수정</a>
         </li>
         <li class="list-group-item">
             <a th:href="@{/orders/my}">주문 내역 보기</a>
         </li>
-        <!-- 상품 등록: 기존 항목 복구 -->
         <li class="list-group-item">
-            <a th:href="@{/items/new}">
-                상품 등록
-            </a>
+            <a th:href="@{/items/new}">상품 등록</a>
         </li>
-        <!-- 고객센터: 문의하기 / 내 문의 목록 -->
+        <li class="list-group-item">
+            <a th:href="@{/items/mine}">등록한 상품 관리</a>
+        </li>
         <li class="list-group-item">
             <a th:href="@{/support/new}">고객센터 문의하기</a>
         </li>
@@ -41,12 +54,24 @@
         </li>
     </ul>
 
-    <div class="mt-4">
+    <!-- 하단 버튼 바: 좌측=탈퇴, 우측=홈 -->
+    <div class="mt-4 d-flex justify-content-between">
+        <form th:action="@{/users/{id}/delete(id=${loginUser.id()})}" method="post"
+              onsubmit="return confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.');"
+              class="m-0">
+            <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="btn btn-danger">탈퇴</button>
+        </form>
+
         <a th:href="@{/}" class="btn btn-secondary">홈으로 돌아가기</a>
     </div>
 </div>
 
 <script th:src="@{/webjars/jquery/3.5.1/jquery.min.js}"></script>
 <script th:src="@{/webjars/bootstrap/4.5.2/js/bootstrap.bundle.min.js}"></script>
+<script>
+    // 선택: 알림 자동 숨김(3초 후)
+    $(function(){ setTimeout(function(){ $('.alert').alert('close'); }, 3000); });
+</script>
 </body>
 </html>

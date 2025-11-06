@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>상품 수정</title>
+    <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet"/>
+    <style>
+        #price::-webkit-outer-spin-button, #price::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        #price { -moz-appearance: textfield; }
+        .img-preview { max-width: 240px; height: auto; border: 1px solid #eee; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">상품 수정</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- th:object 는 컨트롤러에서 넣어준 modelAttr 이름과 맞춰야 합니다 (여기서는 "form") -->
+                    <form th:if="${form != null}"
+                          th:action="@{|/items/${itemId}/edit|}"
+                          th:object="${form}"
+                          method="post"
+                          enctype="multipart/form-data"
+                          novalidate>
+
+                        <!-- CSRF -->
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                        <!-- 상품명 -->
+                        <div class="form-group">
+                            <label for="name">상품명</label>
+                            <input type="text" th:field="*{name}" class="form-control" id="name" required th:errorclass="is-invalid"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                        </div>
+
+                        <!-- 카테고리: 단일 선택이므로 th:field 로 끝 -->
+                        <div class="form-group">
+                            <label for="category">카테고리</label>
+                            <select th:field="*{categoryId}" class="form-control" id="category" required th:errorclass="is-invalid">
+                                <option value="" disabled th:selected="*{categoryId} == null">카테고리 선택</option>
+                                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                            </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></div>
+                        </div>
+
+                        <!-- 가격 -->
+                        <div class="form-group">
+                            <label for="price">가격</label>
+                            <input type="number" th:field="*{price}" class="form-control" id="price" min="0" required th:errorclass="is-invalid"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+                        </div>
+
+                        <!-- 재고 -->
+                        <div class="form-group">
+                            <label for="stockQuantity">재고</label>
+                            <input type="number" th:field="*{stockQuantity}" class="form-control" id="stockQuantity" min="1" required th:errorclass="is-invalid"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('stockQuantity')}" th:errors="*{stockQuantity}"></div>
+                        </div>
+
+                        <!-- 상품 내용 -->
+                        <div class="form-group">
+                            <label for="content">상품 내용</label>
+                            <textarea th:field="*{content}" class="form-control" id="content" rows="8" maxlength="20000" required th:errorclass="is-invalid"></textarea>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+                        </div>
+
+                        <!-- 기존 이미지 미리보기 -->
+                        <div class="form-group" th:if="${currentImageUrl}">
+                            <label>현재 이미지</label><br/>
+                            <img th:src="${currentImageUrl}" alt="현재 이미지" class="img-preview"/>
+                        </div>
+
+                        <!-- 새 이미지(선택) -->
+                        <div class="form-group">
+                            <label for="image">이미지 변경 (선택)</label>
+                            <input type="file" th:field="*{image}" class="form-control-file" id="image" accept="image/*"/>
+                            <small class="text-muted">이미지를 선택하지 않으면 기존 이미지를 유지합니다.</small>
+                            <div class="text-danger small" th:if="${#fields.hasErrors('image')}" th:errors="*{image}"></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">변경 사항 저장</button>
+                        <a th:href="@{|/items/${itemId}|}" class="btn btn-outline-secondary btn-block mt-2">상세로 돌아가기</a>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/webjars/jquery/3.5.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.5.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
