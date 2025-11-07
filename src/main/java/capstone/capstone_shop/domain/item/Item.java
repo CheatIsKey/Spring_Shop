@@ -33,8 +33,7 @@ public abstract class Item {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Lob
-    @Column(name = "content", columnDefinition = "TEXT")
+    @Column(name = "content", columnDefinition = "text")
     @Setter
     private String content;
 

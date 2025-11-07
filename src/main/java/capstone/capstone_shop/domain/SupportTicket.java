@@ -33,7 +33,7 @@ public class SupportTicket extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private TicketCategory category;
 
-    @Lob @Column(nullable = false)
+    @Column(name = "content", columnDefinition = "text", nullable = false)
     private String content;
 
     @Column(name = "is_private", nullable = false)

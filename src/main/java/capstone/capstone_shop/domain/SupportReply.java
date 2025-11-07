@@ -25,7 +25,7 @@ public class SupportReply extends BaseTimeEntity {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-    @Lob @Column(nullable = false)
+    @Column(name = "content", columnDefinition = "text", nullable = false)
     private String content;
 
     @Column(name = "is_staff_reply", nullable = false)

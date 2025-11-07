@@ -19,12 +19,10 @@ public class ItemDetail extends BaseTimeEntity {
     @JoinColumn(name = "item_id", nullable = false, unique = true)
     private Item item;
 
-    @Lob
-    @Column(name = "description", columnDefinition = "TEXT")
-    private  String description;
+    @Column(name = "description", columnDefinition = "text")
+    private String description;
 
-    @Lob
-    @Column(name = "spec", columnDefinition = "TEXT")
+    @Column(name = "spec", columnDefinition = "text")
     private String spec;
 
     public static ItemDetail create(Item item, String description, String spec) {
