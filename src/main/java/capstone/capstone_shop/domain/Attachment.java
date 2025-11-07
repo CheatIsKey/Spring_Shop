@@ -21,7 +21,7 @@ public class Attachment extends BaseTimeEntity{
     @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;
 
-    @Lob @Column(nullable = false)
+    @Column(nullable = false, name = "url", length = 2048)
     private String url;
 
     @Column(name = "mime_type", nullable = false, length = 100)
