@@ -27,7 +27,7 @@ public class ItemDetail extends BaseTimeEntity {
     @Column(name = "spec", columnDefinition = "TEXT")
     private String spec;
 
-    public static ItemDetail crate(Item item, String description, String spec) {
+    public static ItemDetail create(Item item, String description, String spec) {
         ItemDetail detail = new ItemDetail();
         detail.item = item;
         detail.description = description;
